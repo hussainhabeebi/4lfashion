@@ -57,3 +57,7 @@ See [offline operations](docs/OFFLINE.md). Prepare the device online by opening 
 ## Automatic deployment from GitHub
 
 Pushes to `main` run the [Cloudflare deployment workflow](.github/workflows/deploy-cloudflare.yml). Add the two required GitHub repository secrets once; see [auto-deploy setup](docs/AUTO_DEPLOY.md). The workflow checks types/tests, builds the PWA, creates missing current-schema D1 tables and deploys the Worker.
+
+## Team administration
+
+In **Staff & permissions**, owners and administrators can add an additional admin using the Google-account dropdown or a verified Google email. The role dropdown supports Administrator, Store manager and No admin access. Existing roles can be changed directly in the team list. Managers cannot grant team access, duplicate email assignments are rejected, and the owner entry is protected. Staff sign in through Google; adding a member does not send an invitation.
