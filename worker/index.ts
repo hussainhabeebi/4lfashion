@@ -23,7 +23,17 @@ const worker = {
         },
       };
     }
-    return runWithConnectorBinding(binding, () => handler.fetch(request, env, ctx));
+    return runWithConnectorBinding(binding, async () => {
+      const response = await handler.fetch(request, env, ctx);
+      if (response.headers.get("Content-Type")?.includes("text/html")) {
+        const headers = new Headers(response.headers);
+        headers.set("Cache-Control", "private, no-store, max-age=0");
+        headers.set("CDN-Cache-Control", "no-store");
+        headers.set("Cloudflare-CDN-Cache-Control", "no-store");
+        return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+      }
+      return response;
+    });
   },
 };
 
