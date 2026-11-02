@@ -23,3 +23,22 @@ body:has(.admin-shell){padding-bottom:0}
 .footer-brand .brand-logo,.login-card .brand-logo{width:112px;height:112px}
 .admin-logo .brand-logo{width:64px;height:64px;flex-shrink:0}
 @media(max-width:760px){.brand-logo{width:56px;height:56px}.footer-brand .brand-logo{width:84px;height:84px}.admin-logo .brand-logo{width:44px;height:44px}}
+.policy-text{max-width:720px;color:#5f5852;font-size:15px;line-height:1.85}
+.policy-text h2{font-size:26px;color:var(--ink);margin:6px 0 18px;letter-spacing:-.4px}
+.policy-text p{margin:0 0 18px}
+.policy-text strong{color:var(--wine);font-weight:600}
+.policy-text ul,.policy-text ol{margin:0 0 26px;padding:22px 26px;background:#fff;border:1px solid var(--line);border-left:3px solid var(--wine);border-radius:6px;list-style:none;counter-reset:pol}
+.policy-text li{position:relative;padding:9px 0 9px 26px;border-bottom:1px solid #f1ece5}
+.policy-text li:last-child{border-bottom:0}
+.policy-text ul li:before{content:'';position:absolute;left:4px;top:19px;width:7px;height:7px;border-radius:50%;background:var(--gold)}
+.policy-text ol li{counter-increment:pol}
+.policy-text ol li:before{content:counter(pol);position:absolute;left:0;top:10px;font:600 12px var(--sans);color:var(--wine)}
+.policy-text>p:last-child{font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:18px;margin-top:6px}
+.policy-text>p:only-child{font-size:15px;color:#5f5852;border:0;padding:0;margin:0}
+.policy-text.compact{font-size:13px;line-height:1.7}
+.policy-text.compact h2{font-size:15px;font-family:var(--sans);font-weight:600;margin:0 0 8px;letter-spacing:0}
+.policy-text.compact ul,.policy-text.compact ol{padding:6px 0;background:none;border:0;margin:0 0 12px}
+.policy-text.compact li{padding:4px 0 4px 18px;border:0}
+.policy-text.compact ul li:before{top:12px;left:2px;width:5px;height:5px}
+.policy-text.compact>p:last-child{font-size:inherit;color:inherit;border:0;padding:0;margin:0 0 12px}
+@media(max-width:760px){.policy-text{font-size:14px}.policy-text h2{font-size:21px}.policy-text ul,.policy-text ol{padding:14px 16px}}
