@@ -7,7 +7,7 @@ import { sites } from "./scripts/vite/sites-vite-plugin";
 import { connectorPreview } from "./scripts/vite/connector-preview-plugin.mjs";
 
 const CLOUDFLARE_DATABASE_ID =
-  "bb87f23d-a634-4eec-b6ce-4cbed72c27e9";
+  process.env.CLOUDFLARE_D1_DATABASE_ID || "bb87f23d-a634-4eec-b6ce-4cbed72c27e9";
 
 const { d1, r2 } = hostingConfig;
 
@@ -16,6 +16,7 @@ const isCodexSeatbeltSandbox = process.env.CODEX_SANDBOX === "seatbelt";
 const managedLinux = readExecutionProfile() === "managed-linux";
 
 const localBindingConfig = {
+  name: process.env.CLOUDFLARE_WORKER_NAME || "4l-fashion-commerce",
   keep_vars: true,
   main: "./worker/index.ts",
   compatibility_flags: ["nodejs_compat"],
@@ -32,7 +33,7 @@ const localBindingConfig = {
     ? [
         {
           binding: r2,
-          bucket_name: "site-creator-r2",
+          bucket_name: process.env.CLOUDFLARE_R2_BUCKET || "site-creator-r2",
         },
       ]
     : [],

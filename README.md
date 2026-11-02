@@ -53,3 +53,7 @@ Accounting is an operational cashbook plus manual journal, not a complete statut
 See [offline operations](docs/OFFLINE.md). Prepare the device online by opening the authorised dashboard, then install the PWA. First setup, login, external payments and uncached downloads require connectivity. Reopen the app or choose **Sync now** after reconnecting. Keep device storage until all entries are synced.
 
 `pnpm test` checks commerce invariants with real route code against isolated SQLite/identity adapters, and operational persistence with IndexedDB. Tests cover permissions, server prices/coupons, idempotency, atomic stock rollback, concurrent depletion, cancellation, cross-origin protection, Google signature/audience/nonce verification, PKCE/state/replay protection, owner/customer separation, sessions/logout, durable queues, failed-sync retention, ordered retries and online authorisation failures.
+
+## Automatic deployment from GitHub
+
+Pushes to `main` run the [Cloudflare deployment workflow](.github/workflows/deploy-cloudflare.yml). Add the two required GitHub repository secrets once; see [auto-deploy setup](docs/AUTO_DEPLOY.md). The workflow checks types/tests, builds the PWA, creates missing current-schema D1 tables and deploys the Worker.
