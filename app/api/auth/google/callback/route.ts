@@ -1,0 +1,1 @@
+import {env} from 'cloudflare:workers';import {googleCallback} from '../../../../../lib/auth-core';export const dynamic='force-dynamic';export async function GET(req:Request){return googleCallback(req,env)}

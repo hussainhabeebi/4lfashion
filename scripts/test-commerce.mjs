@@ -3,11 +3,12 @@ const sql=new DatabaseSync(':memory:');for(const s of fs.readFileSync('drizzle/0
 const db={prepare(q){return {bind(...v){return {async all(){return {results:sql.prepare(q).all(...v)}},async first(){return sql.prepare(q).get(...v)||null},async run(){return sql.prepare(q).run(...v)},q,v}},async all(){return {results:sql.prepare(q).all()}},async first(){return sql.prepare(q).get()||null},async run(){return sql.prepare(q).run()},q,v:[]}},async batch(stmts){sql.exec('BEGIN');try{const r=stmts.map(s=>sql.prepare(s.q).run(...s.v));sql.exec('COMMIT');return r}catch(e){sql.exec('ROLLBACK');throw e}}};
 globalThis.__testDB=db;globalThis.__testUser=null;
 const catalog=ts.transpileModule(fs.readFileSync('lib/catalog.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.ES2022}}).outputText;
-let source=fs.readFileSync('app/api/store/route.ts','utf8').replace("import { env } from 'cloudflare:workers';","const env={DB:globalThis.__testDB};").replace("import {getChatGPTUser} from '../../chatgpt-auth';","const getChatGPTUser=async()=>globalThis.__testUser;").replace("import {products,initialSettings} from '../../../lib/catalog';",catalog.replaceAll('export ',''));
+let source=fs.readFileSync('app/api/store/route.ts','utf8').replace("import { env } from 'cloudflare:workers';","const env={DB:globalThis.__testDB};").replace("import {getCurrentUser} from '../../auth';","const getCurrentUser=async()=>globalThis.__testUser;").replace("import {products,initialSettings} from '../../../lib/catalog';",catalog.replaceAll('export ',''));
 const mod=await import('data:text/javascript;base64,'+Buffer.from(ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.ES2022,target:ts.ScriptTarget.ES2022}}).outputText).toString('base64'));
 const post=async(action,data={})=>{const r=await mod.POST(new Request('https://test.local/api/store',{method:'POST',headers:{'Content-Type':'application/json','Origin':'https://test.local'},body:JSON.stringify({action,...data})}));return {status:r.status,data:await r.json()}};
 assert.equal((await post('bootstrap')).status,401);
 globalThis.__testUser={userId:'test-owner',email:'owner@example.test',displayName:'Test Owner'};
+assert.equal((await post('bootstrap')).status,403);sql.prepare('INSERT INTO records(id,kind,data,owner,created) VALUES(?,?,?,?,?)').run('owner','staff',JSON.stringify({email:'owner@example.test',role:'owner',name:'Test Owner'}),'test-owner',new Date().toISOString());
 assert.equal((await post('bootstrap')).status,200);assert.equal((await post('bootstrap')).status,409);
 globalThis.__testUser=null;
 assert.equal((await post('stock',{id:'p1-M',delta:5})).status,403);

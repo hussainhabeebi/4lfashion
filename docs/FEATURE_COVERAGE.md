@@ -5,7 +5,7 @@ The README lists working features. This private release is intended for review a
 | Area | Current implementation | Remaining |
 | --- | --- | --- |
 | Payments | COD, externally collected POS payment records | Merchant/gateway selection, card/Apple Pay/BNPL sessions, signed webhooks, reconciliation/refunds |
-| Identity | Sites/ChatGPT sign-in, guest checkout | Phone/WhatsApp OTP, Google and Apple provider |
+| Identity | Google sign-in, D1 sessions, staff access, guest checkout; requires OAuth credentials | Phone/WhatsApp OTP and Apple provider |
 | Messaging | Manual WhatsApp links, captured newsletter/restock requests | Leadvyne/WhatsApp credentials, templates/consent, send jobs, delivery webhooks, cart recovery |
 | Shipping | Qatar rate/threshold, slot requests, manual courier/tracking | Provider APIs, labels, real estimates, zones, COD verification and RTO workflows |
 | Social/marketing | Static illustrative style gallery, editable copy | Live Instagram, pixels/consent, Merchant feed, Meta sync |

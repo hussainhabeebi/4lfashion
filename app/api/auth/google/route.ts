@@ -1,0 +1,1 @@
+import {env} from 'cloudflare:workers';import {googleStart} from '../../../../lib/auth-core';export const dynamic='force-dynamic';export async function GET(req:Request){try{return await googleStart(req,env)}catch{return Response.redirect(new URL('/admin/login?error=configuration',req.url),303)}}

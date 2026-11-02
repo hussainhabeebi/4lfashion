@@ -27,3 +27,5 @@ Failures remain visible with a reason; subsequent operations wait in order. Reso
 Do not clear browser data, use incognito, uninstall the profile or switch devices while changes remain unsynced. Unsynced entries live on that device, not in a cloud backup. Keep operational devices access-controlled because their authorised records are intentionally available offline.
 
 Sync runs in the open/reopened application; closed-app background sync is not guaranteed. First setup/authentication/downloads need connectivity. The HTTP development preview cannot validate HTTPS-only installation; production asset generation, IndexedDB flows and server retry invariants are checked separately.
+
+Google login requires connectivity. Sign out clears the device's private snapshots and is blocked until pending operations are synced. Signing in as another staff member does not authorise replaying the original staff member's queued operations.

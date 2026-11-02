@@ -8,6 +8,13 @@
       "when": 1793559892704,
       "tag": "0000_sad_nitro",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1793586364428,
+      "tag": "0001_useful_guardsmen",
+      "breakpoints": true
     }
   ]
 }

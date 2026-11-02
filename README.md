@@ -24,9 +24,9 @@ node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1
 
 ## Setup
 
-Open `/admin` on the private deployment, sign in, then choose **Initialise store**. The first authenticated owner of this private site becomes the store owner. Repeat initialisation is blocked. Replace the sample catalogue/photography, confirm policies, shipping, measurements and coupons, then add staff emails.
+Configure [Google Login](docs/GOOGLE_LOGIN.md), apply the authentication migration, then sign in at `/admin/login`. Only the verified Google account in `OWNER_EMAIL` can provision the initial owner. Authorised administrators can then choose **Initialise store**. Repeat initialisation is blocked. Replace the sample catalogue/photography, confirm policies, shipping, measurements and coupons, then add staff emails.
 
-Owner/admin/manager accounts can manage the store. Viewers have no admin access. This bootstrap model assumes an owner-private site; initialise before changing its audience. Standalone hosting requires a trusted identity gateway that strips client identity headers. Never expose a Worker while trusting arbitrary incoming identity headers.
+Owner/admin/manager accounts can manage the store. Viewers have no admin access. API identity comes exclusively from opaque Google session cookies backed by D1. Incoming ChatGPT/user identity headers do not grant access. Google customers are separate from staff roles.
 
 The tracked `.openai/hosting.json` retains the review deployment identity. Secrets belong in runtime settings, never source. GitHub `main` contains source; the deployment host has a separately synchronised source repository.
 
@@ -35,7 +35,7 @@ The tracked `.openai/hosting.json` retains the review deployment identity. Secre
 - Editorial desktop storefront and mobile fashion app layout, search, swipeable collection rail, quick-add size sheets, fixed bottom navigation and product purchase bar.
 - Categories/occasion edits, filters, sort/grid, PDP/zoom, optional video/gallery/colour-image URLs, colour/size variants, default size chart, care/fit notes and related pieces.
 - Wishlist/cart, server-priced COD checkout, percentage coupons, shipping threshold, gift-wrap/message, custom-measurement request notes, confirmation and order tracking.
-- Sites/ChatGPT sign-in, order history, address/preferences, return/exchange requests and newsletter/restock request capture.
+- Google sign-in with D1 sessions, order history, address/preferences, return/exchange requests and newsletter/restock request capture.
 - D1-backed products, R2 photo upload, CSV draft import/export, stock adjustments, low-stock indicators, orders, customer history, return/QC queue, editable homepage/policies/size chart, reports, roles and activity log.
 - POS shares stock with online orders. Server prices, transactional negative-stock protection, stable request IDs, duplicate-safe retries and cancellation restocking.
 - Barcode lookup and Code 39 labels, counter payment recording, printable receipts/order details, manual courier references and user-initiated WhatsApp links.
@@ -44,7 +44,7 @@ The tracked `.openai/hosting.json` retains the review deployment identity. Secre
 
 ## Release limits
 
-This is a working first release, **not the entire advanced feature list completed**. See [feature coverage](docs/FEATURE_COVERAGE.md). Card/BNPL gateways, OTP, automated messaging, courier APIs and marketing integrations need provider access plus integration work. Checkout currently uses COD, QAR and one Doha warehouse. No UAE/India tax rule is assumed for Qatar.
+This is a working first release, **not the entire advanced feature list completed**. See [feature coverage](docs/FEATURE_COVERAGE.md). Google sign-in is implemented and requires the store’s Google OAuth credentials and runtime settings. Card/BNPL gateways, OTP, automated messaging, courier APIs and marketing integrations need provider access plus integration work. Checkout currently uses COD, QAR and one Doha warehouse. No UAE/India tax rule is assumed for Qatar.
 
 Accounting is an operational cashbook plus manual journal, not a complete statutory accounting suite. Automated tax invoices, bank reconciliation, automatic cost valuation and tax filings remain unimplemented.
 
@@ -52,4 +52,4 @@ Accounting is an operational cashbook plus manual journal, not a complete statut
 
 See [offline operations](docs/OFFLINE.md). Prepare the device online by opening the authorised dashboard, then install the PWA. First setup, login, external payments and uncached downloads require connectivity. Reopen the app or choose **Sync now** after reconnecting. Keep device storage until all entries are synced.
 
-`pnpm test` checks commerce invariants with real route code against isolated SQLite/identity adapters, and operational persistence with IndexedDB. Tests cover permissions, server prices/coupons, idempotency, atomic stock rollback, concurrent depletion, cancellation, cross-origin protection, durable queues, failed-sync retention, ordered retries and online authorisation failures.
+`pnpm test` checks commerce invariants with real route code against isolated SQLite/identity adapters, and operational persistence with IndexedDB. Tests cover permissions, server prices/coupons, idempotency, atomic stock rollback, concurrent depletion, cancellation, cross-origin protection, Google signature/audience/nonce verification, PKCE/state/replay protection, owner/customer separation, sessions/logout, durable queues, failed-sync retention, ordered retries and online authorisation failures.

@@ -1,0 +1,1 @@
+import {env} from 'cloudflare:workers';import {logout} from '../../../../lib/auth-core';export async function POST(req:Request){return logout(req,env)}
