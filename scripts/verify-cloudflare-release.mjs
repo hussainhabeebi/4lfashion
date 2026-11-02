@@ -1,0 +1,4 @@
+const host=process.env.CLOUDFLARE_STORE_HOST||'4lfashion.com.qa',expected=process.env.GITHUB_SHA;
+if(!/^[a-z0-9.-]+$/i.test(host)||!expected)throw Error('Deployment verification requires a valid hostname and GITHUB_SHA.');
+let seen='unavailable';for(let attempt=0;attempt<8;attempt++){try{const r=await fetch('https://'+host+'/release.json?deployment='+encodeURIComponent(expected),{headers:{'Cache-Control':'no-cache'},signal:AbortSignal.timeout(10000)});if(r.ok&&r.headers.get('content-type')?.includes('json')){const d=await r.json();seen=d.commit||'unknown';if(d.commit===expected){console.log('Verified live release on https://'+host+': '+expected);process.exit(0)}}}catch{}if(attempt<7)await new Promise(r=>setTimeout(r,5000))}
+console.error('::error::Worker upload finished, but the public domain has not confirmed this release. Expected '+expected+'; observed '+seen+'. Check domain routing.');process.exit(1);

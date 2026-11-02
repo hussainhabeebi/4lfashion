@@ -41,3 +41,9 @@ The SQL step covers the six current tables, including Google login. It uses CREA
 Cloudflare runtime Google values (`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `APP_URL`, `OWNER_EMAIL`) stay in the Worker, not this workflow. `keep_vars` preserves dashboard-managed text variables, and runtime secrets remain on Cloudflare. See [Google login setup](GOOGLE_LOGIN.md).
 
 No Cloudflare token has been added on your behalf. Deployment cannot authenticate until the repository secrets above exist. Do not paste tokens into source files or chat.
+
+## Target the real live domain
+
+Before building, CI queries Cloudflare Custom Domains for `4lfashion.com.qa` and resolves its existing Worker. It preserves that Worker's `DB` and `BUCKET` bindings unless repository variables explicitly override them. A conflicting Worker-name override stops deployment rather than updating the wrong Worker. `CLOUDFLARE_STORE_HOST` can specify another primary hostname. The token needs Workers Scripts Read/Edit access to inspect routing and settings. Legacy named Worker environments require explicit configuration.
+
+The build writes a public `release.json` containing only the commit ID and Worker name. CI verifies this commit through the live custom domain after uploading; Worker upload alone is no longer reported as a confirmed public release. The service worker script changes with each release so installed apps discover updates.

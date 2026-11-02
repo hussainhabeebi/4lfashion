@@ -22,6 +22,7 @@ jobs:
       CLOUDFLARE_WORKER_NAME: ${{ vars.CLOUDFLARE_WORKER_NAME }}
       CLOUDFLARE_R2_BUCKET: ${{ vars.CLOUDFLARE_R2_BUCKET }}
       CLOUDFLARE_D1_DATABASE_ID: ${{ vars.CLOUDFLARE_D1_DATABASE_ID }}
+      CLOUDFLARE_STORE_HOST: ${{ vars.CLOUDFLARE_STORE_HOST || '4lfashion.com.qa' }}
       WRANGLER_SEND_METRICS: 'false'
     steps:
       - name: Check Cloudflare deployment secrets
@@ -41,6 +42,12 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '22'
+
+      - name: Resolve Worker serving the live domain
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: node scripts/resolve-cloudflare-target.mjs
 
       - name: Enable the pinned pnpm version
         run: |
@@ -71,8 +78,11 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: pnpm exec wrangler deploy --config dist/server/wrangler.json
 
+      - name: Verify release on the live domain
+        run: node scripts/verify-cloudflare-release.mjs
+
       - name: Deployment summary
         run: |
           echo '## 4L Fashion deployed' >> "$GITHUB_STEP_SUMMARY"
-          echo 'TypeScript, commerce/offline/Google-login tests, PWA build, D1 table setup and Worker deployment completed.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'TypeScript, tests, PWA build, D1 setup, Worker deployment and public-domain release verification completed.' >> "$GITHUB_STEP_SUMMARY"
           echo 'Google login still requires the Google credentials, APP_URL and OWNER_EMAIL in the Cloudflare Worker runtime settings.' >> "$GITHUB_STEP_SUMMARY"
