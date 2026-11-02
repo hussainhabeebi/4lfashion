@@ -1,0 +1,4 @@
+import type { Metadata } from 'next';import './globals.css';
+export const metadata:Metadata={title:'4L Fashion | Everyday elegance, Doha',description:'Discover contemporary ethnic wear, considered essentials and occasion dressing at 4L Fashion, Old Airport Street, Doha, Qatar.',manifest:'/manifest.webmanifest',appleWebApp:{capable:true,title:'4L Fashion',statusBarStyle:'default'},icons:{icon:'/favicon.svg',apple:'/4l-logo.png'}};
+export const viewport={width:'device-width',initialScale:1,themeColor:'#651f34'};
+export default function Layout({children}:{children:React.ReactNode}){return <html lang="en"><body>{children}</body></html>}
