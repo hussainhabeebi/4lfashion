@@ -45,3 +45,24 @@ body:has(.admin-shell){padding-bottom:0}
 .row-actions{display:flex;align-items:center;gap:16px;justify-content:flex-end}
 .text-link.danger{color:#a3261f;border-color:#e3b8b3}
 .text-link.danger:hover{color:#7d1a14}
+.product-photos{margin:22px 0 8px;padding-top:18px;border-top:1px solid var(--line)}
+.product-photos h3{margin:0}
+.photo-drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;margin:12px 0 14px;padding:24px 16px;border:1.5px dashed #d5c7b4;border-radius:8px;background:#fdfbf8;color:var(--wine);text-align:center;cursor:pointer;text-transform:none;font-size:13px;transition:background .15s,border-color .15s}
+.photo-drop:hover,.photo-drop.dragging{background:#f8f0ea;border-color:var(--wine)}
+.photo-drop.busy{cursor:progress;opacity:.75}
+.photo-drop small{color:var(--muted);font-size:10px}
+.photo-drop input{display:none}
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:12px;margin-bottom:14px}
+.photo-grid figure{position:relative;margin:0;aspect-ratio:3/4;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:#f4f1ec}
+.photo-grid figure.main{border:2px solid var(--wine)}
+.photo-grid img{width:100%;height:100%;object-fit:cover}
+.photo-badge,.photo-main{position:absolute;left:6px;top:6px;display:flex;align-items:center;gap:3px;padding:3px 7px;border-radius:20px;font-size:9px;letter-spacing:.4px;background:var(--wine);color:#fff}
+.photo-main{background:rgba(255,255,255,.92);color:var(--wine);opacity:0;transition:opacity .15s}
+.photo-remove{position:absolute;right:6px;top:6px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(255,255,255,.92);color:#a3261f}
+.photo-order{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:space-between;padding:6px;background:linear-gradient(transparent,rgba(0,0,0,.45));opacity:0;transition:opacity .15s}
+.photo-order button{width:24px;height:24px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(255,255,255,.92);color:var(--ink)}
+.photo-order button:disabled{visibility:hidden}
+.photo-grid figure:hover .photo-main,.photo-grid figure:hover .photo-order,.photo-grid figure:focus-within .photo-main,.photo-grid figure:focus-within .photo-order{opacity:1}
+@media(hover:none){.photo-main,.photo-order{opacity:1}}
+.photo-link{display:flex;gap:12px;align-items:center}
+.photo-link input{flex:1;font-size:12px;padding:9px 11px}
