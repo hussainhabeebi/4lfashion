@@ -34,7 +34,7 @@ const badOrigin=await mod.POST(new Request('https://test.local/api/store',{metho
 const adminResponse=await mod.GET(new Request('https://test.local/api/store?action=admin'));assert.equal(adminResponse.status,200);assert.deepEqual((await adminResponse.json()).googleUsers,[]);
 const codeA=await post('save',{kind:'product',id:'p1',data:{...JSON.parse(sql.prepare("SELECT data FROM records WHERE id='p1'").get().data),code:'  4L-SS 001 '}});assert.equal(codeA.status,200);assert.equal(JSON.parse(sql.prepare("SELECT data FROM records WHERE id='p1'").get().data).code,'4L-SS 001');
 assert.equal((await post('save',{kind:'product',id:'p1',data:{...JSON.parse(sql.prepare("SELECT data FROM records WHERE id='p1'").get().data),code:'4L-SS 001'}})).status,200);
-const dupe=await post('save',{kind:'product',id:'p2',data:{...JSON.parse(sql.prepare("SELECT data FROM records WHERE id='p2'").get().data),code:'4l-ss 001'}});assert.equal(dupe.status,409);assert.match(dupe.data.error,/already used/);
+const dupe=await post('save',{kind:'product',id:'p2',data:{...JSON.parse(sql.prepare("SELECT data FROM records WHERE id='p2'").get().data),code:'4l-ss 001'}});assert.equal(dupe.status,409);assert.match(dupe.data.error,/SKU code .* already used/);
 assert.equal((await post('save',{kind:'product',data:{name:'Long code',price:10,code:'X'.repeat(41)}})).status,400);
 const ordersBefore=sql.prepare("SELECT COUNT(*) n FROM records WHERE kind='order'").get().n;assert.ok(sql.prepare("SELECT COUNT(*) n FROM variants WHERE product='p3'").get().n>0);
 globalThis.__testUser=null;assert.equal((await post('deleteProduct',{id:'p3'})).status,403);globalThis.__testUser={userId:'test-owner',email:'owner@example.test',displayName:'Test Owner'};
