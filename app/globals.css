@@ -66,3 +66,6 @@ body:has(.admin-shell){padding-bottom:0}
 @media(hover:none){.photo-main,.photo-order{opacity:1}}
 .photo-link{display:flex;gap:12px;align-items:center}
 .photo-link input{flex:1;font-size:12px;padding:9px 11px}
+.table-product small.product-code{display:block;font-size:10px;letter-spacing:.6px;color:var(--muted);margin-top:2px}
+.table-product small.product-code.missing{color:#b0705f;font-style:italic;letter-spacing:0}
+.pdp-code{display:block;margin:-6px 0 12px;font-size:11px;letter-spacing:.8px;color:var(--muted);text-transform:uppercase}
