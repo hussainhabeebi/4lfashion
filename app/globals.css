@@ -42,3 +42,6 @@ body:has(.admin-shell){padding-bottom:0}
 .policy-text.compact ul li:before{top:12px;left:2px;width:5px;height:5px}
 .policy-text.compact>p:last-child{font-size:inherit;color:inherit;border:0;padding:0;margin:0 0 12px}
 @media(max-width:760px){.policy-text{font-size:14px}.policy-text h2{font-size:21px}.policy-text ul,.policy-text ol{padding:14px 16px}}
+.row-actions{display:flex;align-items:center;gap:16px;justify-content:flex-end}
+.text-link.danger{color:#a3261f;border-color:#e3b8b3}
+.text-link.danger:hover{color:#7d1a14}
