@@ -69,3 +69,103 @@ body:has(.admin-shell){padding-bottom:0}
 .table-product small.product-code{display:block;font-size:10px;letter-spacing:.6px;color:var(--muted);margin-top:2px}
 .table-product small.product-code.missing{color:#b0705f;font-style:italic;letter-spacing:0}
 .pdp-code{display:block;margin:-6px 0 12px;font-size:11px;letter-spacing:.8px;color:var(--muted);text-transform:uppercase}
+
+/* ===== Modern refresh: storefront (desktop + mobile) ===== */
+:root{--radius:18px;--radius-sm:12px;--ease:cubic-bezier(.2,.7,.2,1)}
+html{scroll-behavior:smooth}
+header{position:sticky;top:0;background:rgba(251,250,247,.82);-webkit-backdrop-filter:saturate(1.4) blur(14px);backdrop-filter:saturate(1.4) blur(14px);border-bottom:1px solid rgba(232,226,218,.7)}
+.primary,.cream-button{border-radius:999px;transition:transform .2s var(--ease),box-shadow .2s var(--ease),background .2s}
+.primary:hover,.cream-button:hover{transform:translateY(-1px);box-shadow:0 10px 24px -12px rgba(66,22,39,.55)}
+.text-link{border-bottom:0;padding:9px 16px;border-radius:999px;background:#fff;box-shadow:inset 0 0 0 1px var(--line);transition:background .2s,color .2s}
+.text-link:hover{background:var(--wine);color:#fff;box-shadow:none}
+.section-heading h2{letter-spacing:-.5px}
+
+/* benefits as soft chips */
+.benefits{background:transparent;border:0;gap:14px;padding:22px 5% 0;flex-wrap:wrap}
+.benefits span{background:#fff;border:1px solid var(--line);border-radius:999px;padding:10px 18px}
+
+/* category cards */
+.category-card{border-radius:var(--radius);isolation:isolate;transition:transform .35s var(--ease),box-shadow .35s var(--ease)}
+.category-card:hover{transform:translateY(-4px);box-shadow:0 24px 40px -24px rgba(49,32,22,.45)}
+.category-card>span{background:rgba(255,255,255,.18);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-radius:50%;width:44px;height:44px;display:grid;place-items:center;bottom:24px}
+
+/* pill tabs */
+.collection-tabs{border-bottom:0;gap:8px;scrollbar-width:none}
+.collection-tabs::-webkit-scrollbar{display:none}
+.collection-tabs button{padding:8px 16px;border-radius:999px;background:#fff;box-shadow:inset 0 0 0 1px var(--line);color:var(--ink);white-space:nowrap;transition:background .2s,color .2s}
+.collection-tabs .selected{background:var(--ink);color:#fff;border-bottom:0;box-shadow:none}
+
+/* product cards */
+.product-image{border-radius:var(--radius);transition:box-shadow .35s var(--ease)}
+.product-card:hover .product-image{box-shadow:0 22px 40px -26px rgba(49,32,22,.5)}
+.product-tag{border-radius:999px;padding:5px 10px;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.wish{height:34px;width:34px;background:rgba(255,255,255,.8);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);transition:transform .2s}
+.wish:hover{transform:scale(1.08)}
+.quick-add{left:10px;right:10px;width:auto;bottom:-60px;border-radius:999px;background:rgba(250,248,242,.88);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.product-image:hover .quick-add{bottom:10px}
+.product-meta h3{font-weight:500}
+.product-meta p{font-weight:600;color:var(--wine)}
+
+/* shop by occasion (replaces the old editorial photo block) */
+.occasion-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.occasion-tile{position:relative;overflow:hidden;min-height:250px;padding:26px;border-radius:var(--radius);display:flex;flex-direction:column;justify-content:space-between;text-align:left;color:#fff;background:linear-gradient(150deg,#7a2a43 0%,var(--wine-dark) 100%);transition:transform .35s var(--ease),box-shadow .35s var(--ease)}
+.occasion-tile:nth-child(2){background:linear-gradient(150deg,#c2a678 0%,#8a6c43 100%)}
+.occasion-tile:nth-child(3){background:linear-gradient(150deg,#f4ede0 0%,#e3d6bf 100%);color:var(--ink)}
+.occasion-tile:nth-child(4){background:linear-gradient(150deg,#3b3533 0%,#211d1c 100%)}
+.occasion-tile:before{content:'';position:absolute;width:260px;height:260px;right:-90px;top:-90px;border-radius:50%;border:1px solid currentColor;opacity:.18;transition:transform .6s var(--ease)}
+.occasion-tile:after{content:'';position:absolute;width:160px;height:160px;right:-40px;top:-40px;border-radius:50%;border:1px solid currentColor;opacity:.14}
+.occasion-tile:hover{transform:translateY(-4px);box-shadow:0 26px 44px -26px rgba(49,32,22,.6)}
+.occasion-tile:hover:before{transform:scale(1.12)}
+.occasion-tile small{font-size:11px;letter-spacing:2px;opacity:.7}
+.occasion-tile h3{font-family:var(--serif);font-weight:400;font-size:38px;margin:0 0 6px;line-height:1.1}
+.occasion-tile p{margin:0;font-size:12px;opacity:.8;max-width:200px}
+.occasion-tile>span{position:absolute;right:22px;bottom:24px;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.16);transition:background .2s,transform .2s}
+.occasion-tile:nth-child(3)>span{background:rgba(39,36,35,.08)}
+.occasion-tile:hover>span{transform:rotate(45deg)}
+
+/* story + social */
+.story{border-radius:28px;margin:0 5%;padding:70px 15%}
+.social-grid button{border-radius:var(--radius-sm)}
+
+@media(min-width:1600px){.story{max-width:1500px;margin:0 auto}}
+@media(max-width:1100px){.occasion-grid{grid-template-columns:repeat(2,1fr)}}
+
+@media(max-width:760px){
+  .benefits{padding:10px 18px 0;gap:8px;justify-content:flex-start}
+  .benefits span{padding:7px 12px}
+  .text-link{padding:7px 12px;margin:0}
+  .section-heading{align-items:center}
+  .category-card{border-radius:14px}
+  .collection-tabs button{font-size:11px;padding:7px 14px}
+  .product-image{border-radius:14px}
+  .wish{height:30px;width:30px}
+  .quick-add{left:auto;right:8px;bottom:8px;width:36px;height:36px;padding:0;justify-content:center;align-items:center;border-radius:50%}
+  .quick-add span{display:none}
+  .product-image:hover .quick-add{bottom:8px}
+  /* occasion tiles become a swipeable rail */
+  .occasion-grid{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding:0 20px;gap:12px;margin:0 -20px;padding:0 20px 6px;scrollbar-width:none}
+  .occasion-grid::-webkit-scrollbar{display:none}
+  .occasion-tile{flex:0 0 72%;min-height:200px;scroll-snap-align:start;padding:20px;border-radius:16px}
+  .occasion-tile h3{font-size:30px}
+  .occasion-tile p{font-size:11px}
+  /* classics become a swipeable product rail */
+  .classics .product-grid{display:flex!important;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding:0 20px;gap:12px;margin:0 -20px;padding:0 20px;scrollbar-width:none}
+  .classics .product-grid::-webkit-scrollbar{display:none}
+  .classics .product-card{flex:0 0 62%;scroll-snap-align:start}
+  .story{margin:0 16px;border-radius:20px;padding:40px 24px}
+  .social-grid button{border-radius:10px}
+}
+
+/* admin: homepage category photos */
+.category-images{margin:22px 0 8px;padding-top:18px;border-top:1px solid var(--line)}
+.category-images h3{margin:0}
+.category-image-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin:14px 0}
+.category-image-item figure{margin:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#f4f1ec}
+.category-image-item figure>img,.category-image-item figure>span{display:grid;place-items:center;width:100%;aspect-ratio:4/5;object-fit:cover;font-size:11px}
+.category-image-item figcaption{padding:8px 10px;font-size:12px;font-weight:500;background:#fff}
+.category-image-item figcaption small{font-weight:400;color:var(--muted)}
+.category-image-actions{display:flex;gap:8px;margin:8px 0}
+.category-image-actions .text-link{margin:0;cursor:pointer;font-size:11px;gap:6px}
+.category-image-actions .busy{opacity:.6}
+.category-image-item .photo-link{gap:6px}
+.category-image-item .photo-link .text-link{margin:0;font-size:11px}
