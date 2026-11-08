@@ -155,3 +155,17 @@ header{position:sticky;top:0;background:rgba(251,250,247,.82);-webkit-backdrop-f
   .story{margin:0 16px;border-radius:20px;padding:40px 24px}
   .social-grid button{border-radius:10px}
 }
+
+/* admin: homepage category photos */
+.category-images{margin:22px 0 8px;padding-top:18px;border-top:1px solid var(--line)}
+.category-images h3{margin:0}
+.category-image-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin:14px 0}
+.category-image-item figure{margin:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#f4f1ec}
+.category-image-item figure>img,.category-image-item figure>span{display:grid;place-items:center;width:100%;aspect-ratio:4/5;object-fit:cover;font-size:11px}
+.category-image-item figcaption{padding:8px 10px;font-size:12px;font-weight:500;background:#fff}
+.category-image-item figcaption small{font-weight:400;color:var(--muted)}
+.category-image-actions{display:flex;gap:8px;margin:8px 0}
+.category-image-actions .text-link{margin:0;cursor:pointer;font-size:11px;gap:6px}
+.category-image-actions .busy{opacity:.6}
+.category-image-item .photo-link{gap:6px}
+.category-image-item .photo-link .text-link{margin:0;font-size:11px}

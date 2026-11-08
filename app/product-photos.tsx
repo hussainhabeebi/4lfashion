@@ -10,7 +10,7 @@ export const photoList = (image: string, gallery: string) =>
   [image, ...String(gallery || '').split(',')].map(s => String(s || '').trim()).filter(Boolean)
     .filter((s, i, all) => all.indexOf(s) === i);
 
-async function upload(file: File) {
+export async function upload(file: File) {
   const fd = new FormData(); fd.set('file', file);
   const r = await fetch('/api/media', {method: 'POST', body: fd});
   const d = (await r.json().catch(() => ({error: 'Upload failed'}))) as {url?: string; error?: string};
