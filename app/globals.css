@@ -285,3 +285,12 @@ nav.stuck .nav-logo{opacity:1;transform:translateY(-50%) scale(1);pointer-events
 .occasion-add input{width:190px;font-size:12px;padding:7px 12px;border-radius:999px;border:1px dashed var(--line);background:#fff}
 .occasion-add button{display:inline-flex;align-items:center;gap:4px;font-size:12px;padding:7px 12px;border-radius:999px;background:var(--ink);color:#fff}
 .occasion-add button:disabled{opacity:.4}
+
+/* admin: appearance settings */
+.appearance-settings .panel{margin-bottom:18px}
+.appearance-settings .panel h3{margin:0}
+.appearance-settings .form-grid label.wide{grid-column:1/-1}
+.appearance-settings label>span small{font-weight:400}
+.appearance-reset{align-self:flex-start;font-size:11px;color:var(--wine);padding:2px 0;text-decoration:underline}
+.footer-line{display:block}
+.appearance-settings label{text-transform:none}
