@@ -1,3 +1,6 @@
+// Occasions a product can be tagged with (several allowed, stored comma-separated in `occasion`).
+export const occasions=['Eid','Wedding','Onam','Everyday'];
+export const occasionList=(v:unknown)=>String(v||'').split(',').map(s=>s.trim()).filter(Boolean);
 export const categories=['All pieces','Salwar suits','Kurtas & sets','Occasion wear','Everyday essentials'];
 export const products=[
 {id:'p1',name:'The Gulmohar Silk Set',category:'Salwar suits',price:285,oldPrice:345,colour:'Wine',fabric:'Silk blend',occasion:'Wedding',fit:'Relaxed',image:'https://images.unsplash.com/photo-1585487000160-6ebcfceb0d03?auto=format&fit=crop&w=1000&q=85',tag:'Bestseller'},

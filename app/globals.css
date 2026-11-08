@@ -109,9 +109,9 @@ header{position:sticky;top:0;background:rgba(251,250,247,.82);-webkit-backdrop-f
 /* shop by occasion (replaces the old editorial photo block) */
 .occasion-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
 .occasion-tile{position:relative;overflow:hidden;min-height:250px;padding:26px;border-radius:var(--radius);display:flex;flex-direction:column;justify-content:space-between;text-align:left;color:#fff;background:linear-gradient(150deg,#7a2a43 0%,var(--wine-dark) 100%);transition:transform .35s var(--ease),box-shadow .35s var(--ease)}
-.occasion-tile:nth-child(2){background:linear-gradient(150deg,#c2a678 0%,#8a6c43 100%)}
-.occasion-tile:nth-child(3){background:linear-gradient(150deg,#f4ede0 0%,#e3d6bf 100%);color:var(--ink)}
-.occasion-tile:nth-child(4){background:linear-gradient(150deg,#3b3533 0%,#211d1c 100%)}
+.occ-wedding{background:linear-gradient(150deg,#c2a678 0%,#8a6c43 100%)}
+.occ-onam{background:linear-gradient(150deg,#f4ede0 0%,#e3d6bf 100%);color:var(--ink)}
+.occ-everyday{background:linear-gradient(150deg,#3b3533 0%,#211d1c 100%)}
 .occasion-tile:before{content:'';position:absolute;width:260px;height:260px;right:-90px;top:-90px;border-radius:50%;border:1px solid currentColor;opacity:.18;transition:transform .6s var(--ease)}
 .occasion-tile:after{content:'';position:absolute;width:160px;height:160px;right:-40px;top:-40px;border-radius:50%;border:1px solid currentColor;opacity:.14}
 .occasion-tile:hover{transform:translateY(-4px);box-shadow:0 26px 44px -26px rgba(49,32,22,.6)}
@@ -120,7 +120,7 @@ header{position:sticky;top:0;background:rgba(251,250,247,.82);-webkit-backdrop-f
 .occasion-tile h3{font-family:var(--serif);font-weight:400;font-size:38px;margin:0 0 6px;line-height:1.1}
 .occasion-tile p{margin:0;font-size:12px;opacity:.8;max-width:200px}
 .occasion-tile>span{position:absolute;right:22px;bottom:24px;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.16);transition:background .2s,transform .2s}
-.occasion-tile:nth-child(3)>span{background:rgba(39,36,35,.08)}
+.occ-onam>span{background:rgba(39,36,35,.08)}
 .occasion-tile:hover>span{transform:rotate(45deg)}
 
 /* story + social */
@@ -184,3 +184,100 @@ nav.stuck .nav-logo{opacity:1;transform:translateY(-50%) scale(1);pointer-events
   nav.stuck .nav-logo{transform:none;flex-basis:36px;width:36px;margin-right:0;z-index:1}
   .shop-toolbar{top:46px}
 }
+
+/* ===== Desktop (PC) design pass — phones are unaffected ===== */
+@media(min-width:1024px){
+  main>section:not(.hero):not(.benefits):not(.editorial):not(.story){max-width:1320px;padding:80px 48px}
+  .eyebrow{font-size:11px;letter-spacing:2.6px}
+  .section-heading h2{font-size:44px;line-height:1.12}
+  .section-heading{margin-bottom:36px}
+  .text-link{font-size:13px;padding:11px 20px}
+
+  /* header + category bar */
+  .header-main{height:84px;max-width:1320px;padding:0 48px}
+  header-location,.header-location{font-size:13px}
+  .brand-logo{height:64px;width:auto}
+  .header-actions{gap:10px}
+  .header-actions button{width:42px;height:42px;border-radius:50%;justify-content:center;align-items:center;transition:background .2s}
+  .header-actions button:hover{background:#efe9df}
+  nav:not(.open){height:54px;gap:8px}
+  nav:not(.open)>button:not(.nav-logo){font-size:13.5px;letter-spacing:.3px;padding:8px 16px;border-radius:999px;transition:background .2s,color .2s}
+  nav:not(.open)>button:not(.nav-logo):hover{background:#efe9df}
+  .nav-logo{left:max(48px,calc((100% - 1320px)/2 + 48px))}
+  .nav-logo img{height:40px}
+
+  /* hero: rounded split card, text panel + framed photo */
+  .hero{display:grid;grid-template-columns:1.05fr .95fr;height:clamp(480px,calc(100vh - 190px),620px);min-height:0;max-width:1320px;margin:28px auto 0;border-radius:32px;background:linear-gradient(140deg,#4a1a2c 0%,#651f34 55%,#7d2c44 100%);box-shadow:0 40px 80px -50px rgba(66,22,39,.6)}
+  .hero-shade{display:none}
+  .hero-copy{grid-column:1;grid-row:1;align-self:center;padding:72px 40px 72px 72px;max-width:640px}
+  .hero h1{font-size:clamp(56px,5vw,72px);max-width:560px;letter-spacing:-2px;margin:22px 0}
+  .hero p{font-size:16px;max-width:420px;line-height:1.75;color:#f0e4dc}
+  .hero .eyebrow{font-size:11px}
+  .hero .cream-button{padding:16px 26px;font-size:14px;gap:22px}
+  .hero-note{font-size:11px;margin-top:40px}
+  .hero-image{grid-column:2;grid-row:1;position:relative;width:calc(100% - 24px);height:calc(100% - 48px);min-height:0;margin:24px 24px 24px 0;border-radius:22px;object-fit:cover;object-position:50% 20%;right:auto}
+  .hero-side{display:none}
+  .hero-pagination{left:72px;bottom:32px}
+
+  /* benefits */
+  .benefits{max-width:1320px;margin:0 auto;padding:28px 48px 0;gap:16px}
+  .benefits span{font-size:13px;padding:12px 22px}
+
+  /* category tiles: taller, portrait */
+  .category-grid{gap:24px}
+  .category-card{height:auto;aspect-ratio:4/5}
+  .category-card>div{left:30px;bottom:30px}
+  .category-card small{font-size:13px}
+  .category-card h3{font-size:36px}
+
+  /* product cards */
+  .product-grid{gap:36px 28px}
+  .product-image{height:auto;aspect-ratio:3/4}
+  .product-tag{font-size:11px;padding:6px 12px;left:14px;top:14px}
+  .wish{width:40px;height:40px;right:14px;top:14px}
+  .quick-add{font-size:13px;padding:14px 20px}
+  .product-meta{padding:18px 2px}
+  .product-meta small{font-size:12px;letter-spacing:.3px}
+  .product-meta h3{font-size:16px;margin:4px 0 8px}
+  .product-meta p{font-size:15px}
+  .collection-tabs{gap:10px;margin-bottom:32px}
+  .collection-tabs button{font-size:14px;padding:10px 20px}
+
+  /* occasions */
+  .occasion-grid{gap:20px}
+  .occasion-tile{min-height:300px;padding:32px}
+  .occasion-tile small{font-size:12px}
+  .occasion-tile h3{font-size:46px}
+  .occasion-tile p{font-size:14px;max-width:none;padding-right:56px}
+
+  /* story */
+  .story{max-width:1320px;margin:0 auto;padding:90px 18%}
+  .story h2{font-size:52px}
+  .story p{font-size:16px;max-width:620px;line-height:1.8}
+  .story .eyebrow{font-size:11px}
+
+  /* social */
+  .social-grid{gap:16px}
+  .social-grid button{height:auto;aspect-ratio:1;border-radius:18px}
+  .social>small{font-size:12px}
+
+  /* newsletter + footer */
+  .newsletter{max-width:1320px;margin:40px auto 0;border-radius:28px;padding:56px 64px}
+  .newsletter h2{font-size:38px}
+  .newsletter p,.newsletter input{font-size:15px}
+  .newsletter .eyebrow{font-size:11px}
+  .newsletter small{font-size:12px}
+  footer{margin-top:64px}
+  .footer-top,.footer-bottom{max-width:1320px;margin-left:auto;margin-right:auto}
+  footer h4{font-size:14px}
+  footer button,footer a,footer li,footer address,footer small{font-size:14px}
+  .footer-brand p{font-size:20px}
+}
+
+/* admin: product occasion tick boxes */
+.occasion-picker{grid-column:1/-1;border:1px solid var(--line);border-radius:12px;padding:12px 14px 14px;margin:0;display:flex;flex-wrap:wrap;gap:8px}
+.occasion-picker legend{font-size:12px;padding:0 6px;color:var(--ink)}
+.occasion-picker legend small{color:var(--muted)}
+.occasion-picker label{display:inline-flex!important;flex-direction:row!important;align-items:center;gap:7px;margin:0;padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:12px}
+.occasion-picker label.on{background:var(--wine);border-color:var(--wine);color:#fff}
+.occasion-picker input{width:auto;margin:0;accent-color:#fff}
