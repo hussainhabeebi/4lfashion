@@ -6,7 +6,7 @@ import {products as samples} from '../lib/catalog';
 
 // Homepage category tiles. Each category can have its own photo set here; when it
 // has none, the storefront uses the main photo of the first product in that category.
-export const CATEGORY_TILES = ['Salwar suits', 'Sarees', 'Kurtas & sets', 'Occasion wear', 'Everyday essentials', 'All pieces'];
+export const CATEGORY_TILES = ['Salwar suits', 'Kurtas & sets', 'Occasion wear', 'Everyday essentials', 'All pieces'];
 type Product = {id?: string; category?: string; image?: string};
 const SAMPLE_IDS = new Set(samples.map(p => p.id));
 const TYPES = ['image/jpeg', 'image/png', 'image/webp'];
