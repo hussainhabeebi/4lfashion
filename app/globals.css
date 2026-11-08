@@ -169,3 +169,18 @@ header{position:sticky;top:0;background:rgba(251,250,247,.82);-webkit-backdrop-f
 .category-image-actions .busy{opacity:.6}
 .category-image-item .photo-link{gap:6px}
 .category-image-item .photo-link .text-link{margin:0;font-size:11px}
+
+/* ===== Sticky category bar: only the categories stay pinned while scrolling ===== */
+header{display:contents}
+nav:not(.open){position:sticky;top:0;z-index:30;background:rgba(251,250,247,.88);-webkit-backdrop-filter:saturate(1.4) blur(14px);backdrop-filter:saturate(1.4) blur(14px);transition:box-shadow .25s}
+nav.stuck{box-shadow:0 6px 18px -12px rgba(49,32,22,.35)}
+.nav-logo{position:absolute;left:5%;top:50%;transform:translateY(-50%) scale(.6);opacity:0;pointer-events:none;padding:0;display:flex;transition:opacity .25s,transform .25s}
+.nav-logo img{height:36px;width:auto}
+nav.stuck .nav-logo{opacity:1;transform:translateY(-50%) scale(1);pointer-events:auto}
+@media(max-width:760px){
+  nav:not(.open){height:46px}
+  .nav-logo{position:sticky;left:0;top:auto;transform:none;flex:0 0 0;width:0;margin-right:-23px;overflow:hidden;align-self:stretch;align-items:center;background:inherit;transition:flex-basis .25s,width .25s,margin .25s,opacity .25s}
+  .nav-logo img{height:30px}
+  nav.stuck .nav-logo{transform:none;flex-basis:36px;width:36px;margin-right:0;z-index:1}
+  .shop-toolbar{top:46px}
+}
