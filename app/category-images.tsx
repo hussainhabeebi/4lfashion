@@ -6,14 +6,16 @@ import {products as samples} from '../lib/catalog';
 
 // Homepage category tiles. Each category can have its own photo set here; when it
 // has none, the storefront uses the main photo of the first product in that category.
-export const CATEGORY_TILES = ['Salwar suits', 'Kurtas & sets', 'Occasion wear', 'Everyday essentials', 'All pieces'];
+// 'Main banner' is the large photo at the top of the homepage.
+export const HERO = 'Main banner';
+export const CATEGORY_TILES = [HERO, 'Salwar suits', 'Kurtas & sets', 'Occasion wear', 'Everyday essentials', 'All pieces'];
 type Product = {id?: string; category?: string; image?: string};
 const SAMPLE_IDS = new Set(samples.map(p => p.id));
 const TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
 export function categoryImage(name: string, custom: Record<string, string> | undefined, products: Product[]) {
   if (custom?.[name]) return custom[name];
-  const list = (name === 'All pieces' ? products : products.filter(p => p.category === name)).filter(p => p.image);
+  const list = (name === 'All pieces' || name === HERO ? products : products.filter(p => p.category === name)).filter(p => p.image);
   // Prefer the store's own products over the starter samples added at setup.
   return (list.find(p => !SAMPLE_IDS.has(String(p.id))) || list[0])?.image || '';
 }
@@ -41,12 +43,12 @@ export default function CategoryImages({value, products, notify}: {
 
   return <div className="category-images">
     <input type="hidden" name="categoryImages" value={JSON.stringify(images)}/>
-    <div className="between"><h3>Homepage category photos</h3><small className="muted">Without a custom photo, the first product in the category is used</small></div>
+    <div className="between"><h3>Homepage photos</h3><small className="muted">Main banner and category tiles · without a custom photo, a product photo is used</small></div>
     <div className="category-image-grid">{CATEGORY_TILES.map(name => {
       const src = categoryImage(name, images, products), custom = !!images[name];
       return <div className="category-image-item" key={name}>
         <figure>{src ? <img src={src} alt={name}/> : <span className="muted">No photo yet</span>}
-          <figcaption>{name === 'All pieces' ? 'New in' : name}{!custom && src ? <small> · from products</small> : null}</figcaption></figure>
+          <figcaption>{name === 'All pieces' ? 'New in' : name === HERO ? 'Main banner (top of homepage)' : name}{!custom && src ? <small> · from products</small> : null}</figcaption></figure>
         <div className="category-image-actions">
           <label className={'text-link' + (busy === name ? ' busy' : '')}><ImagePlus size={14}/> {busy === name ? 'Uploading…' : custom ? 'Replace' : 'Upload'}
             <input type="file" accept={TYPES.join(',')} style={{display: 'none'}} disabled={!!busy} onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; choose(name, f); }}/></label>
