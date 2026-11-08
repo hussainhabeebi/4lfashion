@@ -172,13 +172,13 @@ header{position:sticky;top:0;background:rgba(251,250,247,.82);-webkit-backdrop-f
 
 /* ===== Sticky category bar: only the categories stay pinned while scrolling ===== */
 header{display:contents}
-nav:not(.open){position:sticky;top:0;z-index:30;background:rgba(251,250,247,.88);-webkit-backdrop-filter:saturate(1.4) blur(14px);backdrop-filter:saturate(1.4) blur(14px);transition:box-shadow .25s}
+nav:not(.open):not(.admin-navigation){position:sticky;top:0;z-index:30;background:rgba(251,250,247,.88);-webkit-backdrop-filter:saturate(1.4) blur(14px);backdrop-filter:saturate(1.4) blur(14px);transition:box-shadow .25s}
 nav.stuck{box-shadow:0 6px 18px -12px rgba(49,32,22,.35)}
 .nav-logo{position:absolute;left:5%;top:50%;transform:translateY(-50%) scale(.6);opacity:0;pointer-events:none;padding:0;display:flex;transition:opacity .25s,transform .25s}
 .nav-logo img{height:36px;width:auto}
 nav.stuck .nav-logo{opacity:1;transform:translateY(-50%) scale(1);pointer-events:auto}
 @media(max-width:760px){
-  nav:not(.open){height:46px}
+  nav:not(.open):not(.admin-navigation){height:46px}
   .nav-logo{position:sticky;left:0;top:auto;transform:none;flex:0 0 0;width:0;margin-right:-23px;overflow:hidden;align-self:stretch;align-items:center;background:inherit;transition:flex-basis .25s,width .25s,margin .25s,opacity .25s}
   .nav-logo img{height:30px}
   nav.stuck .nav-logo{transform:none;flex-basis:36px;width:36px;margin-right:0;z-index:1}
@@ -200,9 +200,9 @@ nav.stuck .nav-logo{opacity:1;transform:translateY(-50%) scale(1);pointer-events
   .header-actions{gap:10px}
   .header-actions button{width:42px;height:42px;border-radius:50%;justify-content:center;align-items:center;transition:background .2s}
   .header-actions button:hover{background:#efe9df}
-  nav:not(.open){height:54px;gap:8px}
-  nav:not(.open)>button:not(.nav-logo){font-size:13.5px;letter-spacing:.3px;padding:8px 16px;border-radius:999px;transition:background .2s,color .2s}
-  nav:not(.open)>button:not(.nav-logo):hover{background:#efe9df}
+  nav:not(.open):not(.admin-navigation){height:54px;gap:8px}
+  nav:not(.open):not(.admin-navigation)>button:not(.nav-logo){font-size:13.5px;letter-spacing:.3px;padding:8px 16px;border-radius:999px;transition:background .2s,color .2s}
+  nav:not(.open):not(.admin-navigation)>button:not(.nav-logo):hover{background:#efe9df}
   .nav-logo{left:max(48px,calc((100% - 1320px)/2 + 48px))}
   .nav-logo img{height:40px}
 
@@ -281,3 +281,7 @@ nav.stuck .nav-logo{opacity:1;transform:translateY(-50%) scale(1);pointer-events
 .occasion-picker label{display:inline-flex!important;flex-direction:row!important;align-items:center;gap:7px;margin:0;padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:12px}
 .occasion-picker label.on{background:var(--wine);border-color:var(--wine);color:#fff}
 .occasion-picker input{width:auto;margin:0;accent-color:#fff}
+.occasion-add{display:inline-flex;gap:6px;align-items:center;margin-left:4px}
+.occasion-add input{width:190px;font-size:12px;padding:7px 12px;border-radius:999px;border:1px dashed var(--line);background:#fff}
+.occasion-add button{display:inline-flex;align-items:center;gap:4px;font-size:12px;padding:7px 12px;border-radius:999px;background:var(--ink);color:#fff}
+.occasion-add button:disabled{opacity:.4}
