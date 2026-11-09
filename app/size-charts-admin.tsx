@@ -1,7 +1,7 @@
 "use client";
 import {useState} from 'react';
 import {Plus, Star, Trash2, X} from 'lucide-react';
-import {sizeCharts, defaultChartId, type SizeChart} from '../lib/size-charts';
+import {sizeCharts, defaultChartId, SIZE_SET, type SizeChart} from '../lib/size-charts';
 
 // Admin > Size charts: several named charts; one is the default used by any
 // product that has no chart of its own.
@@ -27,7 +27,7 @@ export default function SizeChartsAdmin({settings, busy, onSave}: {
   }
   async function save(e: React.FormEvent) {
     e.preventDefault();
-    const clean = charts.map(c => ({...c, name: c.name.trim() || 'Untitled chart', columns: c.columns.map(x => x.trim()).filter(Boolean),
+    const clean = charts.map(c => ({...c, sizeSet: SIZE_SET, name: c.name.trim() || 'Untitled chart', columns: c.columns.map(x => x.trim()).filter(Boolean),
       rows: c.rows.filter(r => r.size.trim()).map(r => ({size: r.size.trim(), values: r.values}))}));
     const d = clean.find(c => c.id === def) || clean[0];
     // Keep the old single-chart field in step with the default, for anything still reading it.
