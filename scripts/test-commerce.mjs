@@ -36,7 +36,7 @@ const codeA=await post('save',{kind:'product',id:'p1',data:{...JSON.parse(sql.pr
 assert.equal((await post('save',{kind:'product',id:'p1',data:{...JSON.parse(sql.prepare("SELECT data FROM records WHERE id='p1'").get().data),code:'4L-SS 001'}})).status,200);
 const dupe=await post('save',{kind:'product',id:'p2',data:{...JSON.parse(sql.prepare("SELECT data FROM records WHERE id='p2'").get().data),code:'4l-ss 001'}});assert.equal(dupe.status,409);assert.match(dupe.data.error,/SKU code .* already used/);
 assert.equal((await post('save',{kind:'product',data:{name:'Long code',price:10,code:'X'.repeat(41)}})).status,400);
-assert.deepEqual(sql.prepare("SELECT size FROM variants WHERE product='p1' ORDER BY rowid").all().map(r=>r.size),['M','L','XL','XXL','3XL','4XL']);
+assert.deepEqual(sql.prepare("SELECT size FROM variants WHERE product='p1' ORDER BY rowid").all().map(r=>r.size),['M','L','XL','XXL','3XL','4XL','5XL']);
 sql.prepare('INSERT INTO variants(id,product,size,colour,stock,price,barcode) VALUES(?,?,?,?,?,?,?)').run('p1-legacy-XS','p1','XS','Wine',5,10000,'4L-p1-XS');const retired=await post('checkout',{...cart,requestId:crypto.randomUUID(),items:[{variant:'p1-legacy-XS',qty:1}]});assert.equal(retired.status,409);assert.equal(sql.prepare("SELECT stock FROM variants WHERE id='p1-legacy-XS'").get().stock,5);
 const ordersBefore=sql.prepare("SELECT COUNT(*) n FROM records WHERE kind='order'").get().n;assert.ok(sql.prepare("SELECT COUNT(*) n FROM variants WHERE product='p3'").get().n>0);
 globalThis.__testUser=null;assert.equal((await post('deleteProduct',{id:'p3'})).status,403);globalThis.__testUser={userId:'test-owner',email:'owner@example.test',displayName:'Test Owner'};

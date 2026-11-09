@@ -18,22 +18,32 @@ export function sizeCharts(settings: Settings): SizeChart[] {
   return (saved.length ? saved : [legacyChart(settings.sizeChart)]).map(withCurrentSizes);
 }
 
-// The store moved from XS–XXL to M–4XL. A chart saved before that loses its XS/S rows
-// and gains 3XL/4XL rows, continuing each numeric column's last step (e.g. +2 in).
-// Charts saved from the admin after the change carry `sizeSet`, so they are left as edited.
-export const SIZE_SET = 'M-4XL';
-const RETIRED = ['XS', 'S'], ADDED = ['3XL', '4XL'];
+// Size-range changes, oldest first. A chart is brought up to date by applying every
+// step after the one it was last saved at: retired sizes are dropped and new sizes are
+// appended, continuing each numeric column's last step (e.g. +2 in; +2 when the
+// last step is missing or over 4 in). Charts saved from
+// the admin carry the current `sizeSet`, so later edits there are left as they are.
+const STEPS = [
+  {set: 'M-4XL', drop: ['XS', 'S'], add: ['3XL', '4XL']},
+  {set: 'M-5XL', drop: [] as string[], add: ['5XL']},
+];
+export const SIZE_SET = STEPS[STEPS.length - 1].set;
+const norm = (s: unknown) => String(s).trim().toUpperCase();
 export function withCurrentSizes(chart: SizeChart): SizeChart {
-  if ((chart as SizeChart & {sizeSet?: string}).sizeSet === SIZE_SET) return chart;
-  const rows = chart.rows.filter(r => !RETIRED.includes(String(r.size).trim().toUpperCase()));
-  for (const size of ADDED) {
-    if (rows.some(r => String(r.size).trim().toUpperCase() === size)) continue;
-    const last = rows[rows.length - 1], prev = rows[rows.length - 2], values: Record<string, string> = {};
-    for (const col of chart.columns) {
-      const a = Number(last?.values[col]), b = Number(prev?.values[col]);
-      values[col] = last && last.values[col] !== '' && Number.isFinite(a) ? String(+(a + (Number.isFinite(b) && prev?.values[col] !== '' && a > b ? a - b : 2)).toFixed(2)) : '';
+  const done = STEPS.findIndex(s => s.set === (chart as SizeChart & {sizeSet?: string}).sizeSet);
+  if (done === STEPS.length - 1) return chart;
+  let rows = chart.rows;
+  for (const step of STEPS.slice(done + 1)) {
+    rows = rows.filter(r => !step.drop.includes(norm(r.size)));
+    for (const size of step.add) {
+      if (rows.some(r => norm(r.size) === size)) continue;
+      const last = rows[rows.length - 1], prev = rows[rows.length - 2], values: Record<string, string> = {};
+      for (const col of chart.columns) {
+        const a = Number(last?.values[col]), b = Number(prev?.values[col]);
+        values[col] = last && last.values[col] !== '' && Number.isFinite(a) ? String(+(a + (Number.isFinite(b) && prev?.values[col] !== '' && a > b && a - b <= 4 ? a - b : 2)).toFixed(2)) : '';
+      }
+      rows = [...rows, {size, values}];
     }
-    rows.push({size, values});
   }
   return {...chart, rows, sizeSet: SIZE_SET} as SizeChart;
 }
