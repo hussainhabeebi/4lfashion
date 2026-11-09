@@ -15,7 +15,27 @@ export function legacyChart(rows: unknown): SizeChart {
 
 export function sizeCharts(settings: Settings): SizeChart[] {
   const saved = Array.isArray(settings.sizeCharts) ? (settings.sizeCharts as SizeChart[]).filter(c => c && c.id && Array.isArray(c.rows)) : [];
-  return saved.length ? saved : [legacyChart(settings.sizeChart)];
+  return (saved.length ? saved : [legacyChart(settings.sizeChart)]).map(withCurrentSizes);
+}
+
+// The store moved from XS–XXL to M–4XL. A chart saved before that loses its XS/S rows
+// and gains 3XL/4XL rows, continuing each numeric column's last step (e.g. +2 in).
+// Charts saved from the admin after the change carry `sizeSet`, so they are left as edited.
+export const SIZE_SET = 'M-4XL';
+const RETIRED = ['XS', 'S'], ADDED = ['3XL', '4XL'];
+export function withCurrentSizes(chart: SizeChart): SizeChart {
+  if ((chart as SizeChart & {sizeSet?: string}).sizeSet === SIZE_SET) return chart;
+  const rows = chart.rows.filter(r => !RETIRED.includes(String(r.size).trim().toUpperCase()));
+  for (const size of ADDED) {
+    if (rows.some(r => String(r.size).trim().toUpperCase() === size)) continue;
+    const last = rows[rows.length - 1], prev = rows[rows.length - 2], values: Record<string, string> = {};
+    for (const col of chart.columns) {
+      const a = Number(last?.values[col]), b = Number(prev?.values[col]);
+      values[col] = last && last.values[col] !== '' && Number.isFinite(a) ? String(+(a + (Number.isFinite(b) && prev?.values[col] !== '' && a > b ? a - b : 2)).toFixed(2)) : '';
+    }
+    rows.push({size, values});
+  }
+  return {...chart, rows, sizeSet: SIZE_SET} as SizeChart;
 }
 
 export function defaultChartId(settings: Settings) {
