@@ -48,3 +48,13 @@ CREATE TABLE IF NOT EXISTS `auth_users` (
 	`created` integer NOT NULL
 );
 
+
+-- One-time data change (2026-11): lower a saved Qatar delivery charge of QAR 20 to QAR 10.
+-- Guarded by a marker record so it runs only once; later changes made in the admin are kept.
+UPDATE `records` SET `data` = json_set(`data`, '$.shipping', 10)
+WHERE `kind` = 'settings'
+  AND CAST(json_extract(`data`, '$.shipping') AS REAL) = 20
+  AND NOT EXISTS (SELECT 1 FROM `records` WHERE `id` = 'migration-delivery-charge-10');
+
+INSERT OR IGNORE INTO `records` (`id`, `kind`, `data`, `owner`, `created`)
+VALUES ('migration-delivery-charge-10', 'migration', '{"shipping":10}', NULL, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
