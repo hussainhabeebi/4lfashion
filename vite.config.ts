@@ -20,6 +20,8 @@ const localBindingConfig = {
   keep_vars: true,
   main: "./worker/index.ts",
   compatibility_flags: ["nodejs_compat"],
+  // Cloudflare Workers AI powers fit memory, the photo fit match and the occasion planner.
+  ai: { binding: "AI" },
   d1_databases: d1
     ? [
         {
