@@ -3,9 +3,18 @@ import {getCurrentUser} from '../../auth';
 import {products,initialSettings,SIZES,RETIRED_SIZES} from '../../../lib/catalog';
 import {applyCancellation,addEvent,customerCanCancel,staffCanCancel,statusEvent,timelineOf,ORDER_STATUSES,NOTIFY_EVENTS} from '../../../lib/orders';
 import {notifyCustomer,notifyStore,notifyConfig,sendEmail,sendWhatsApp} from '../../../lib/notify';
+import {readFitIssues,measureGarmentPhoto,planOccasion} from '../../../lib/ai-features';
+import {addSignals,type FitProfile} from '../../../lib/fit-ai';
 export const dynamic='force-dynamic';
 const db=()=>{if(!env.DB)throw Error('Database unavailable');return env.DB};
 const json=(x:any,status=200)=>Response.json(x,{status,headers:{'Cache-Control':'no-store'}});
+// Cloudflare Workers AI binding; absent locally or when not configured, in which case the AI features fall back to rules.
+const workersAi=()=>(env as any).AI;
+// Simple per-IP limit for the AI endpoints so the paid models cannot be hammered.
+async function aiAllowed(req:Request,limit=8){const ip=req.headers.get('cf-connecting-ip')||'local',minute=new Date().toISOString().slice(0,16),id='ai-rate:'+ip+':'+minute;await db().prepare("INSERT INTO records(id,kind,data,owner,created) VALUES(?,?,'{\"n\":1}',NULL,?) ON CONFLICT(id) DO UPDATE SET data=json_set(data,'$.n',json_extract(data,'$.n')+1)").bind(id,'aiRate',new Date().toISOString()).run();const r:any=await db().prepare('SELECT data FROM records WHERE id=?').bind(id).first();if(Math.random()<0.05)await db().prepare("DELETE FROM records WHERE kind='aiRate' AND created<?").bind(new Date(Date.now()-3600e3).toISOString()).run();return JSON.parse(r?.data||'{}').n<=limit;}
+async function fitProfileOf(userId:string):Promise<FitProfile>{const r:any=await db().prepare("SELECT data FROM records WHERE id=?").bind('fit-'+userId).first();return r?JSON.parse(r.data):{signals:[]};}
+// Products a shopper can actually buy: published, with at least one in-stock current size.
+async function buyable(){const ps=await rows('product'),vs:any[]=(await db().prepare('SELECT * FROM variants WHERE stock>0').all()).results;return ps.filter((p:any)=>p.published!==false&&vs.some(v=>v.product===p.id&&!RETIRED_SIZES.includes(v.size)));}
 async function rows(kind:string){let r=await db().prepare('SELECT * FROM records WHERE kind=? ORDER BY created DESC').bind(kind).all();return r.results.map((r:any)=>({...JSON.parse(r.data),id:r.id,owner:r.owner,created:r.created}));}
 async function write(kind:string,id:string,data:any,owner:string|null=null){await db().prepare('INSERT INTO records(id,kind,data,owner,created) VALUES(?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data').bind(id,kind,JSON.stringify(data),owner,new Date().toISOString()).run();}
 async function initialised(){return !!(await db().prepare("SELECT id FROM records WHERE id='store-initialized'").first());}
@@ -21,6 +30,7 @@ async function audit(action:string){const u=await getCurrentUser();await write('
 export async function GET(req:Request){try{const url=new URL(req.url),action=url.searchParams.get('action')||'catalog';
 if(action==='catalog'){const ps=await rows('product'),vs=(await db().prepare('SELECT * FROM variants').all()).results;return json({products:ps,variants:vs,settings:await settings(),seeded:ps.length>0||await initialised(),user:await getCurrentUser(),isAdmin:await admin()});}
 if(action==='account'){const u=await getCurrentUser();if(!u)return json({error:'Sign in required'},401);return json({orders:(await rows('order')).filter((x:any)=>x.owner===u.userId).map((o:any)=>({...o,timeline:timelineOf(o,false)})),profile:(await rows('profile')).find((x:any)=>x.owner===u.userId)||{},returns:(await rows('return')).filter((x:any)=>x.owner===u.userId)});}
+if(action==='fitProfile'){const u=await getCurrentUser();if(!u)return json({signals:[]});return json(await fitProfileOf(u.userId));}
 if(action==='track'){const id=url.searchParams.get('id'),email=url.searchParams.get('email');let o=(await rows('order')).find((x:any)=>x.id===id&&x.email.toLowerCase()===email?.toLowerCase());return o?json({id:o.id,status:o.status,created:o.created,tracking:o.tracking||'',carrier:o.carrier||''}):json({error:'Order not found. Check your reference and email.'},404);}
 if(action==='admin'){if(!await admin())return json({error:'Administrator access required'},403);const kinds=['product','order','return','customer','expense','staff','activity','coupon','review','subscriber','stockMovement','journal'];const all=await Promise.all(kinds.map(rows));return json({...Object.fromEntries(kinds.map((k,i)=>[k,all[i]])),settings:await settings(),notifyConfig:notifyConfig(env as any),googleUsers:(await db().prepare('SELECT id,email,name FROM auth_users ORDER BY name').all()).results,variants:(await db().prepare('SELECT * FROM variants').all()).results});}
 return json({error:'Unknown action'},400);
@@ -39,7 +49,27 @@ await write('customer','customer-'+order.email,{name:order.name,email:order.emai
 if(!pos){try{const cfg:any=await settings();const sent=[...await notifyCustomer(env as any,{id,...order} as any,'confirmed',cfg),...await notifyStore(env as any,{id,...order} as any,cfg)];const saved=await getOrder(id);if(saved)await logSends(saved,sent)}catch{}}
 return json({id,...order});}
 if(action==='subscribe'){if(!body.email||!/^.+@.+\..+$/.test(body.email))return json({error:'Valid email required'},400);await write('subscriber','sub-'+String(body.email).toLowerCase(),{email:body.email,variant:body.variant||null,type:body.variant?'back-in-stock':'newsletter'});return json({ok:true});}
-if(action==='profile'||action==='return'||action==='review'){const u=await getCurrentUser();if(!u)return json({error:'Please sign in'},401);if(action==='profile'){await write('profile','profile-'+u.userId,body.data,u.userId);return json({ok:true});}const o=(await rows('order')).find((x:any)=>x.id===body.data.orderId&&x.owner===u.userId);if(!o)return json({error:'Order not found'},404);await write(action,crypto.randomUUID(),{...body.data,status:'Pending'},u.userId);return json({ok:true});}
+if(action==='profile'||action==='return'||action==='review'){const u=await getCurrentUser();if(!u)return json({error:'Please sign in'},401);if(action==='profile'){await write('profile','profile-'+u.userId,body.data,u.userId);return json({ok:true});}const o=(await rows('order')).find((x:any)=>x.id===body.data.orderId&&x.owner===u.userId);if(!o)return json({error:'Order not found'},404);const returnId=crypto.randomUUID();await write(action,returnId,{...body.data,status:'Pending'},u.userId);
+if(action==='return'){
+// Fit memory: read fit problems from the reason and remember them against the returned size and cut.
+try{const line=o.items.find((l:any)=>l.variant===body.data.variant)||(o.items.length===1?o.items[0]:null);
+if(line?.size){const v:any=await db().prepare('SELECT product FROM variants WHERE id=?').bind(line.variant).first(),p:any=v?(await rows('product')).find((x:any)=>x.id===v.product):null;
+const {issues,source}=await readFitIssues(workersAi(),String(body.data.reason||''),[line.name,p?.fit&&p.fit+' fit',p?.category].filter(Boolean).join(', '));
+if(issues.length){const at=new Date().toISOString(),profile=addSignals(await fitProfileOf(u.userId),issues.map(i=>({...i,size:line.size,productId:v?.product||'',productName:line.name,fit:String(p?.fit||''),category:String(p?.category||''),at})));
+await write('fitProfile','fit-'+u.userId,profile,u.userId);await write('return',returnId,{...body.data,status:'Pending',fitIssues:issues,fitSource:source},u.userId);
+return json({ok:true,learned:issues});}}}catch(e){console.warn('Fit memory update failed',e);}}
+return json({ok:true});}
+if(action==='fitProfileReset'){const u=await getCurrentUser();if(!u)return json({error:'Please sign in'},401);await db().prepare('DELETE FROM records WHERE id=?').bind('fit-'+u.userId).run();return json({ok:true});}
+if(action==='fitPhoto'){if(!await aiAllowed(req))return json({error:'Too many requests. Please wait a minute and try again.'},429);
+const image=String(body.image||'');if(!/^data:image\/(jpeg|png|webp);base64,/.test(image)||image.length>2_800_000)return json({error:'Upload a JPEG, PNG or WebP photo under 2 MB.'},400);
+if(!workersAi())return json({error:'Photo measuring is not available right now. Enter the measurements by hand.'},503);
+const r=await measureGarmentPhoto(workersAi(),image,String(body.reference||'none'));
+if(!r)return json({error:'We could not read the garment in that photo. Lay it flat, photograph from straight above with the whole garment in frame, or enter measurements by hand.'},422);
+return json(r);}
+if(action==='occasionPlan'){if(!await aiAllowed(req))return json({error:'Too many requests. Please wait a minute and try again.'},429);
+const brief=String(body.brief||'').trim();if(brief.length<8||brief.length>600)return json({error:'Describe your occasion in 8 to 600 characters.'},400);
+const ps=await buyable();if(!ps.length)return json({error:'The collection is being prepared. Please check back soon.'},409);
+const cfg:any=await settings();return json(await planOccasion(workersAi(),brief,ps,cfg.currency||'QAR'));}
 if(action==='orderCancel'){const u=await getCurrentUser()
 if(!u)return json({error:'Please sign in to cancel an order'},401)
 const o=await getOrder(body.id),staff=await admin()

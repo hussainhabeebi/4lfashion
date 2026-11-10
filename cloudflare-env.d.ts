@@ -6,6 +6,8 @@ declare namespace Cloudflare {
     APP_URL?: string;
     OWNER_EMAIL?: string;
     BUCKET?: R2Bucket;
+    // Cloudflare Workers AI (fit memory, photo fit match, occasion planner)
+    AI?: Ai;
     // Order notifications (see docs/NOTIFICATIONS.md)
     RESEND_API_KEY?: string;
     EMAIL_FROM?: string;

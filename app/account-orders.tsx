@@ -10,7 +10,7 @@ const STEPS = [{key: 'Confirmed', label: 'Confirmed', icon: Check}, {key: 'Packi
 const stepOf = (s: string) => s === 'Completed' ? 3 : STEPS.findIndex(x => x.key === s);
 const label = (s: string) => s === 'Cancelled' ? 'Cancelled' : STEPS[stepOf(s)]?.label || s;
 
-type Api = (action: string, data?: Record<string, unknown>) => Promise<{order?: Order}>;
+type Api = (action: string, data?: Record<string, unknown>) => Promise<{order?: Order; learned?: unknown[]}>;
 export default function AccountOrders({orders, cfg, api, toast, onUpdate}: {orders: Order[]; cfg: Record<string, unknown>; api: Api; toast: (m: string) => void; onUpdate: (o: Order) => void}) {
   const [openId, setOpenId] = useState<string | null>(null);
   const open = orders.find(o => o.id === openId);
@@ -79,8 +79,10 @@ function OrderView({o, cfg, api, toast, onUpdate, back}: {o: Order; cfg: Record<
     </div>
 
     {['Delivered', 'Completed'].includes(o.status) && <details className="return-request"><summary>Request a return or size exchange</summary>
-      <form onSubmit={async e => { e.preventDefault(); try { await api('return', {data: {...Object.fromEntries(new FormData(e.currentTarget)), orderId: o.id}}); toast('Request received. Our team will review it.'); } catch (err) { toast(err instanceof Error ? err.message : 'Could not send'); } }}>
+      <form onSubmit={async e => { e.preventDefault(); try { const r = await api('return', {data: {...Object.fromEntries(new FormData(e.currentTarget)), orderId: o.id}}); toast(r.learned?.length ? 'Request received. We’ve saved this to your fit memory for future size notes.' : 'Request received. Our team will review it.'); } catch (err) { toast(err instanceof Error ? err.message : 'Could not send'); } }}>
         <select name="type"><option>Size exchange</option><option>Return</option></select>
-        <textarea name="reason" required placeholder="Item, preferred size and reason"/><button className="outline">Submit request</button></form></details>}
+        {o.items.length > 1 && <select name="variant" aria-label="Item">{o.items.filter(l => activeQty(l)).map(l => <option key={l.variant} value={l.variant}>{l.name}{l.size ? ' · ' + l.size : ''}</option>)}</select>}
+        {o.items.length === 1 && <input type="hidden" name="variant" value={o.items[0].variant}/>}
+        <textarea name="reason" required placeholder="How did it fit? e.g. Too tight in the shoulders, would like size L"/><button className="outline">Submit request</button></form></details>}
   </div>;
 }
