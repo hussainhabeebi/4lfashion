@@ -6,5 +6,12 @@ declare namespace Cloudflare {
     APP_URL?: string;
     OWNER_EMAIL?: string;
     BUCKET?: R2Bucket;
+    // Order notifications (see docs/NOTIFICATIONS.md)
+    RESEND_API_KEY?: string;
+    EMAIL_FROM?: string;
+    WHATSAPP_TOKEN?: string;
+    WHATSAPP_PHONE_NUMBER_ID?: string;
+    WHATSAPP_TEMPLATE?: string;
+    WHATSAPP_TEMPLATE_LANG?: string;
   }
 }

@@ -353,3 +353,81 @@ nav.stuck .nav-logo{opacity:1;transform:translateY(-50%) scale(1);pointer-events
 .chart-edit th>button:not(.text-link){margin-left:2px;opacity:.5}
 .chart-edit td input{width:80px}
 .size-guide-chart h3{margin:22px 0 8px}
+
+/* ===== Order management (admin) ===== */
+.order-tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.order-tabs button{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:12px}
+.order-tabs button span{font-size:10px;color:var(--muted);background:#f4efe8;border-radius:999px;padding:1px 7px}
+.order-tabs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}.order-tabs button.on span{background:rgba(255,255,255,.2);color:#fff}
+.orders-table td,.orders-table th{white-space:nowrap}.orders-table .num{text-align:right}
+.orders-table tr.clickable{cursor:pointer}.orders-table tr.clickable:hover td{background:#faf6f0}
+.badge.amber{background:#fbf1dc;color:#9a6b1f}
+.order-detail{max-width:1240px}
+.order-head{margin-bottom:16px}.order-head .text-link{display:inline-flex;align-items:center;gap:6px}
+.order-title{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px}.order-title h2{margin:0;font-size:24px}
+.order-head>p{margin:4px 0 12px}
+.order-actions,.row-actions,.notify-buttons,.my-order-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.order-actions .outline,.notify-buttons .outline,.my-order-actions .outline,.order-detail .outline{min-height:38px;padding:8px 14px;gap:8px;font-size:12px;border-radius:999px;background:#fff;text-decoration:none;color:inherit}
+.outline.danger{color:#a3261f;border-color:#efc9c4}.outline.disabled{pointer-events:none;opacity:.45}
+.primary.danger-fill{background:#a3261f}
+.order-detail .primary{min-height:40px;padding:9px 18px;gap:8px;font-size:12px;width:auto;margin:0;display:inline-flex;align-items:center}
+.order-grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:18px;align-items:start}
+.order-grid .panel{margin-bottom:18px;border-radius:14px}.order-grid h3{display:flex;align-items:center;gap:8px;margin:0 0 12px;font-size:15px}
+.order-line{display:grid;grid-template-columns:52px 1fr auto auto;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.order-line img,.order-line .thumb{width:52px;height:64px;object-fit:cover;border-radius:8px;background:#efe9df;display:block}
+.order-line.gone{opacity:.55}.order-line.gone b{text-decoration:line-through}.order-line .num{text-align:right;min-width:90px}
+.cancelled-note{color:#a3261f;font-weight:600}
+.qty-pick{display:flex!important;flex-direction:row!important;align-items:center;gap:6px;font-size:12px;margin:0}.qty-pick select{width:auto;padding:5px 8px}
+.cancel-box{border:1px solid #efc9c4;background:#fdf6f5;border-radius:12px;padding:14px 16px;margin:12px 0}
+.cancel-box.inline{margin-top:14px}.cancel-box h3{margin:0 0 6px}
+.check{display:flex!important;flex-direction:row!important;align-items:center;gap:8px;text-transform:none;font-size:12px}.check input{width:auto;margin:0}
+.stepper{display:flex;list-style:none;padding:0;margin:0 0 16px;gap:0;overflow-x:auto}
+.stepper li{flex:1;min-width:90px;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;color:var(--muted);position:relative}
+.stepper li:before{content:'';position:absolute;top:13px;left:-50%;width:100%;height:2px;background:var(--line);z-index:0}.stepper li:first-child:before{display:none}
+.stepper li span{position:relative;z-index:1;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:#fff;border:2px solid var(--line);font-size:11px;font-weight:600}
+.stepper li.done{color:var(--ink)}.stepper li.done span{background:#52745a;border-color:#52745a;color:#fff}.stepper li.done:before,.stepper li.now:before{background:#52745a}
+.stepper li.now{color:var(--wine);font-weight:600}.stepper li.now span{border-color:var(--wine);color:var(--wine)}
+.muted-details{margin-top:12px;font-size:12px}.muted-details summary{cursor:pointer;color:var(--muted)}
+.pay-rows{margin:6px 0 14px}.pay-rows>div{display:flex;justify-content:space-between;padding:5px 0;font-size:13px}
+.pay-rows .total{border-top:1px solid var(--line);margin-top:4px;padding-top:9px;font-weight:700;font-size:15px}
+.pay-rows .refund{color:#a3261f;font-weight:600}
+.note-box{display:flex;gap:8px;margin-bottom:14px}.note-box input{flex:1}
+.timeline{list-style:none;margin:0;padding:0}.timeline li{display:grid;grid-template-columns:14px 1fr;gap:10px;padding:8px 0;position:relative}
+.timeline li .dot{width:10px;height:10px;border-radius:50%;background:#cdbfae;margin-top:5px}.timeline li.note .dot{background:var(--gold)}.timeline li.cancel .dot{background:#a3261f}.timeline li.status .dot,.timeline li.created .dot{background:var(--wine)}
+.timeline li p{margin:0;font-size:13px}.timeline li .badge{margin-left:8px}.timeline small{display:inline-flex;align-items:center;gap:4px}
+.contact{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:13px}.contact a{color:var(--wine)}
+.addr{display:grid;grid-template-columns:80px 1fr;gap:4px 10px;margin:0;font-size:13px}.addr dt{color:var(--muted)}.addr dd{margin:0}
+.notify-card .preview{background:#f6f2ec;border-radius:10px;padding:10px 12px;font-size:12px;line-height:1.5}
+.small{font-size:11px}
+.notify-table td,.notify-table th{text-align:left}.notify-table th svg{vertical-align:-2px}.notify-table input{width:auto}
+.notification-settings .setup code{background:#f4efe8;padding:1px 6px;border-radius:4px;font-size:12px}
+.notification-settings .setup h4{display:flex;align-items:center;gap:8px;margin:18px 0 6px}
+.test-row{display:flex;gap:10px;align-items:flex-end;margin-top:10px}.test-row label{flex:1;max-width:340px}
+.notification-settings .badge svg{vertical-align:-1px}
+@media(max-width:1000px){.order-grid{grid-template-columns:1fr}}
+
+/* ===== Order management (customer account) ===== */
+.my-orders{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin:12px 0 28px}
+.my-order-card{text-align:left;padding:16px;border:1px solid var(--line);border-radius:14px;background:#fff;display:flex;flex-direction:column;gap:10px;transition:box-shadow .2s}
+.my-order-card:hover{box-shadow:0 14px 30px -20px rgba(49,32,22,.45)}
+.my-order-card .thumbs{display:flex;gap:6px}.my-order-card .thumbs img,.my-order-card .thumbs span{width:44px;height:56px;border-radius:8px;object-fit:cover;background:#efe9df}
+.my-order{margin:12px 0 30px}.my-order h2{margin:12px 0 2px}
+.order-banner{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:12px;margin:16px 0}.order-banner p{margin:4px 0 0}
+.order-banner.cancelled{background:#fdf0ee;color:#8d2f27}
+.track-steps{display:flex;list-style:none;padding:0;margin:18px 0}
+.track-steps li{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;color:var(--muted);position:relative;text-align:center}
+.track-steps li:before{content:'';position:absolute;top:15px;left:-50%;width:100%;height:2px;background:var(--line)}.track-steps li:first-child:before{display:none}
+.track-steps li span{position:relative;z-index:1;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:#fff;border:2px solid var(--line)}
+.track-steps li.done span,.track-steps li.now span{background:var(--wine);border-color:var(--wine);color:#fff}.track-steps li.done:before,.track-steps li.now:before{background:var(--wine)}
+.track-steps li.now{color:var(--wine);font-weight:600}
+.my-order-items{border:1px solid var(--line);border-radius:14px;padding:6px 16px;background:#fff;margin:14px 0}
+.my-order-items .order-line{grid-template-columns:52px 1fr auto}
+.my-order-actions{margin:14px 0}
+.my-order-info{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:18px}.my-order-info h3{font-size:14px;margin:0 0 8px}
+.return-request{margin-top:18px}
+@media(max-width:760px){.my-order-info{grid-template-columns:1fr}.track-steps li{font-size:10px}.order-line{grid-template-columns:44px 1fr auto}.order-line .num{display:none}}
+.my-order>.between{flex-wrap:wrap;gap:10px;align-items:flex-start}
+.my-order>.between>div{min-width:0;flex:1 1 220px}
+.my-order h2{font-size:clamp(22px,4vw,30px);overflow-wrap:anywhere;line-height:1.2}
+.my-order>.between .outline{min-height:38px;padding:8px 14px;gap:8px;font-size:12px;border-radius:999px;background:#fff}
+.order-title h2{overflow-wrap:anywhere}
