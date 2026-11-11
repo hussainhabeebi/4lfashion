@@ -11,10 +11,10 @@ const toUrl=code=>'data:text/javascript;base64,'+Buffer.from(ts.transpileModule(
 const catalog=ts.transpileModule(fs.readFileSync('lib/catalog.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.ES2022}}).outputText;
 const ordersUrl=toUrl(fs.readFileSync('lib/orders.ts','utf8'));
 const notifyUrl=toUrl(fs.readFileSync('lib/notify.ts','utf8').replace("from './orders'","from '"+ordersUrl+"'"));
-const fitUrl=toUrl(fs.readFileSync('lib/fit-ai.ts','utf8')),waiUrl=toUrl(fs.readFileSync('lib/workers-ai.ts','utf8')),aifUrl=toUrl(fs.readFileSync('lib/ai-features.ts','utf8').replace("from './workers-ai'","from '"+waiUrl+"'").replace("from './fit-ai'","from '"+fitUrl+"'"));
+const fitUrl=toUrl(fs.readFileSync('lib/fit-ai.ts','utf8')),waiUrl=toUrl(fs.readFileSync('lib/workers-ai.ts','utf8')),aifUrl=toUrl(fs.readFileSync('lib/ai-features.ts','utf8').replace("from './workers-ai'","from '"+waiUrl+"'").replace("from './fit-ai'","from '"+fitUrl+"'")),qUrl=toUrl(fs.readFileSync('lib/qatar.ts','utf8')),qaiUrl=toUrl(fs.readFileSync('lib/qatar-ai.ts','utf8').replace("from './workers-ai'","from '"+waiUrl+"'").replace("from './qatar'","from '"+qUrl+"'"));
 const source=fs.readFileSync('app/api/store/route.ts','utf8').replace("import { env } from 'cloudflare:workers';","const env=globalThis.__testEnv;").replace("import {getCurrentUser} from '../../auth';","const getCurrentUser=async()=>globalThis.__testUser;")
   .replace("import {products,initialSettings,SIZES,RETIRED_SIZES} from '../../../lib/catalog';",catalog.replaceAll('export ',''))
-  .replace("'../../../lib/orders'","'"+ordersUrl+"'").replace("'../../../lib/notify'","'"+notifyUrl+"'").replace("'../../../lib/ai-features'","'"+aifUrl+"'").replace("'../../../lib/fit-ai'","'"+fitUrl+"'");
+  .replace("'../../../lib/orders'","'"+ordersUrl+"'").replace("'../../../lib/notify'","'"+notifyUrl+"'").replace("'../../../lib/ai-features'","'"+aifUrl+"'").replace("'../../../lib/fit-ai'","'"+fitUrl+"'").replace("'../../../lib/qatar-ai'","'"+qaiUrl+"'").replace("'../../../lib/qatar'","'"+qUrl+"'");
 const mod=await import(toUrl(source));
 const post=async(action,data={})=>{const r=await mod.POST(new Request('https://test.local/api/store',{method:'POST',headers:{'Content-Type':'application/json','Origin':'https://test.local'},body:JSON.stringify({action,...data})}));return {status:r.status,data:await r.json()}};
 const get=async action=>{const r=await mod.GET(new Request('https://test.local/api/store?action='+action));return {status:r.status,data:await r.json()}};

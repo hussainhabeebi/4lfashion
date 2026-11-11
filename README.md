@@ -41,6 +41,7 @@ The tracked `.openai/hosting.json` retains the review deployment identity. Secre
 - Barcode lookup and Code 39 labels, counter payment recording, printable receipts/order details, manual courier references and user-initiated WhatsApp links.
 - Accounting cashbook for sales, collected payments, receivables and expenses, plus balanced immutable manual journals. Journals are separate from the derived order cashbook; they are not automatically posted from each order.
 - AI fit and styling on Cloudflare Workers AI: fit memory learned from returns with per-size notes, "Fits like my favourite" photo size matching, and an occasion planner that plans a look for each event. See [AI features](docs/AI_FEATURES.md).
+- Life in Qatar for expat families: what to wear where (malls, offices, majlis, mosques, National Day), a monthly wardrobe for outdoor heat and office AC, festival-far-from-home kits with Doha community events, a new-to-Qatar welcome wardrobe, and community group orders with shared size links and discount tiers. See [Life in Qatar](docs/LIFE_IN_QATAR.md).
 - Installable PWA, precached production JS/CSS, IndexedDB snapshots, offline POS/stock/expenses/journals, ordered durable outbox, conflict visibility and reconnect retry.
 
 ## Release limits
