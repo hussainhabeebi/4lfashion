@@ -38,6 +38,12 @@ assert.deepEqual(q.sanitizeMembers([{who:'Daughter',age:'8',size:'M'},{who:'',ag
 assert.deepEqual(q.mergePicks([{productId:'nope'},{productId:'p2',why:'Ivory cotton for the office.'},{productId:'p2'}],all,[q.toPick(all[0],'fallback')],2).map(p=>p.productId),['p2','p1']);
 assert.match(q.groupCode(),/^[A-HJ-NP-Z2-9]{6}$/);
 
+// Homepage "Ask the 4L stylist": rules parse budget, colours, occasions and avoids.
+let sq=q.parseShopQuery('Breezy ivory kurta for the office under QAR 200, no black');
+assert.equal(sq.budget,200);assert.deepEqual(sq.colours,['ivory']);assert.deepEqual(sq.avoid,['black']);assert.equal(sq.formality,'smart');assert.ok(sq.airy);assert.deepEqual(sq.categories,['Kurtas & sets']);
+assert.deepEqual(q.parseShopQuery('Eid outfit in gold').occasions,['Eid']);assert.equal(q.parseShopQuery('300 qar wedding').budget,300);
+let ss=q.styleSearchFallback('ivory kurta under 200, no black',all,6);assert.ok(ss.picks.every(p=>p.price<=200),'budget respected');assert.ok(!ss.picks.some(p=>p.colour==='Black'));assert.match(ss.answer,/under QAR 200/);
+ss=q.styleSearchFallback('something under 50',all,6);assert.ok(ss.picks.length>=1);assert.match(ss.answer,/closest matches/,'falls back when nothing fits the budget');
 // ---------- API ----------
 const sql=new DatabaseSync(':memory:');
 for(const file of ['drizzle/0000_sad_nitro.sql','drizzle/0001_useful_guardsmen.sql'])for(const s of fs.readFileSync(file,'utf8').split('--> statement-breakpoint'))sql.exec(s);
@@ -78,6 +84,9 @@ assert.deepEqual(r.data.welcome,{code:'WELCOMEQA',text:'10% off your first order
 // Dress guide (no AI).
 r=await post('dressGuide',{question:'What can I wear to a mall in Lusail?'});assert.equal(r.status,200);assert.equal(r.data.source,'rules');assert.equal(r.data.places[0].id,'mall');assert.ok(r.data.picks.length>=1);
 assert.equal((await post('dressGuide',{question:'hi'})).status,400);
+r=await post('styleSearch',{question:'Light cotton kurta for work under 200'});assert.equal(r.status,200);assert.equal(r.data.source,'rules');assert.ok(r.data.picks.length>=1&&r.data.picks.every(p=>p.price<=200));
+assert.equal((await post('styleSearch',{question:'x'})).status,400);
+
 
 // Festival kit (no AI): community events for that festival, video-call ideas.
 r=await post('festivalKit',{festival:'onam'});assert.equal(r.status,200);assert.equal(r.data.festival.name,'Onam');
@@ -131,11 +140,13 @@ globalThis.__testEnv.AI={async run(model,input){aiCalls.push(input);const sys=in
   if(sys.includes('dress-code question'))return {response:{answer:'For a majlis, wear something loose and ankle-length.',tips:['Carry a dupatta.'],picks:[{productId:'p8',why:'Black georgette.'},{productId:'p2',why:'Ivory cotton kurta, easy and modest.'},{productId:'ghost',why:'x'}]}};
   if(sys.includes('monthly wardrobe'))return {response:{intro:'November is lovely in Doha.',tips:['Evenings by the sea get breezy.'],picks:[{productId:'p4',why:'Sage linen co-ord.'}]}};
   if(sys.includes('far from family'))return {response:{intro:'Happy Onam!',call:['Share your sadya on video.'],picks:[{productId:'p7',why:'Kasavu for Onam.'}]}};
+  if(sys.includes('free-text request'))return {response:{answer:'Gold for Eid, easy in the heat.',tips:['Add jhumkas.'],picks:[{productId:'p8',why:'Over budget.'},{productId:'p5',why:'Gold silk for Eid.'},{productId:'ghost',why:'x'}]}};
   if(sys.includes('just arrived'))return {response:{intro:'Welcome to Doha, Nair family!',tips:['Cover shoulders and knees in malls.'],why:[]}};
   throw new Error('unexpected prompt');}};
 r=await post('dressGuide',{question:'We are invited to a majlis'});assert.equal(r.data.source,'ai');assert.match(r.data.answer,/ankle-length/);
 assert.ok(!r.data.picks.some(p=>p.productId==='ghost'));assert.equal(r.data.picks.find(p=>p.productId==='p2').why,'Ivory cotton kurta, easy and modest.');
 assert.match(aiCalls.at(-1).messages[0].content,/Majlis or Qatari home visit/,'model is grounded in the checked norms');
+r=await post('styleSearch',{question:'Eid outfit in gold under 400'});assert.equal(r.data.source,'ai');assert.equal(r.data.picks[0].productId,'p5');assert.equal(r.data.picks[0].why,'Gold silk for Eid.');assert.ok(!r.data.picks.some(p=>p.productId==='ghost'||p.productId==='p8'),'AI picks over budget or unknown are dropped');assert.equal(r.data.tips[0],'Add jhumkas.');
 const before=aiCalls.length;r=await get('qatarMonth');assert.equal(r.data.source,'ai');assert.equal(r.data.intro,'November is lovely in Doha.'.replace('November',r.data.climate.month));
 r=await get('qatarMonth');assert.equal(aiCalls.length,before+1,'month guide is cached for everyone');
 r=await post('festivalKit',{festival:'onam'});assert.equal(r.data.intro,'Happy Onam!');assert.equal(r.data.call[0],'Share your sadya on video.');
@@ -147,4 +158,4 @@ delete globalThis.__testEnv.AI;
 as(owner);assert.equal((await post('deleteCommunityEvent',{id:ev[0].id})).status,200);assert.equal((await get('admin')).data.communityEvent.length,1);
 as(null);assert.equal((await post('deleteCommunityEvent',{id:ev[1].id})).status,403,'admin only');
 
-console.log('PASS: Life in Qatar dress-sense guide, monthly AC-to-heat wardrobe, festival kits with store-set dates and community events, new-to-Qatar welcome kit, community group orders (discount tiers, privacy, permissions, concurrency), AI grounding, validation and caching.');
+console.log('PASS: homepage AI stylist search, Life in Qatar dress-sense guide, monthly AC-to-heat wardrobe, festival kits with store-set dates and community events, new-to-Qatar welcome kit, community group orders (discount tiers, privacy, permissions, concurrency), AI grounding, validation and caching.');

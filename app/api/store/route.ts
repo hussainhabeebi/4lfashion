@@ -6,7 +6,7 @@ import {notifyCustomer,notifyStore,notifyConfig,sendEmail,sendWhatsApp} from '..
 import {readFitIssues,measureGarmentPhoto,planOccasion} from '../../../lib/ai-features';
 import {addSignals,type FitProfile} from '../../../lib/fit-ai';
 import {qatarMonth,festivalsAround,FESTIVALS,sanitizeMembers,sanitizeTiers,groupTotals,groupCode,mergePicks,topPicks,festivalWant,monthWardrobe} from '../../../lib/qatar';
-import {dressGuide,monthGuide,festivalKit,welcomeKit,themeMatch} from '../../../lib/qatar-ai';
+import {dressGuide,monthGuide,festivalKit,welcomeKit,themeMatch,styleSearch} from '../../../lib/qatar-ai';
 export const dynamic='force-dynamic';
 const db=()=>{if(!env.DB)throw Error('Database unavailable');return env.DB};
 const json=(x:any,status=200)=>Response.json(x,{status,headers:{'Cache-Control':'no-store'}});
@@ -99,7 +99,9 @@ const brief=String(body.brief||'').trim();if(brief.length<8||brief.length>600)re
 const ps=await buyable();if(!ps.length)return json({error:'The collection is being prepared. Please check back soon.'},409);
 const cfg:any=await settings();return json(await planOccasion(workersAi(),brief,ps,cfg.currency||'QAR'));}
 // ---------- Life in Qatar (Workers AI) ----------
-if(['dressGuide','welcomeKit','groupTheme','festivalKit'].includes(action)&&!await aiAllowed(req))return json({error:'Too many requests. Please wait a minute and try again.'},429);
+if(['dressGuide','welcomeKit','groupTheme','festivalKit','styleSearch'].includes(action)&&!await aiAllowed(req))return json({error:'Too many requests. Please wait a minute and try again.'},429);
+// Homepage "Ask the 4L stylist": free-text shopping search with AI picks (rules fallback).
+if(action==='styleSearch'){const q=String(body.question||'').trim();if(q.length<3||q.length>300)return json({error:'Describe what you are looking for in 3 to 300 characters.'},400);const ps=await buyable();if(!ps.length)return json({error:'The collection is being prepared. Please check back soon.'},409);return json(await styleSearch(workersAi(),q,ps,qatarMonth()));}
 if(action==='dressGuide'){const q=String(body.question||'').trim();if(q.length<4||q.length>400)return json({error:'Ask your question in 4 to 400 characters.'},400);const ps=await buyable();if(!ps.length)return json({error:'The collection is being prepared. Please check back soon.'},409);return json(await dressGuide(workersAi(),q,ps,qatarMonth()));}
 if(action==='festivalKit'){const cfg:any=await settings(),m=qatarMonth(),f=festivalsAround(m,qatarYear(),cfg.festivalDates||{},qatarToday()).find(x=>x.id===body.festival);if(!f)return json({error:'Unknown festival'},400);const ps=await buyable();if(!ps.length)return json({error:'The collection is being prepared. Please check back soon.'},409);
 const events=(await upcomingEvents(120)).filter((e:any)=>!e.festival||e.festival===f.id);
