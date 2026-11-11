@@ -188,3 +188,41 @@ export function themePicks(theme: string, products: QProduct[], n = 4): Pick[] {
     .sort((a, b) => b.s - a.s || a.p.price - b.p.price).slice(0, n).filter((x, i) => x.s > 0 || i < 2).map(({p}) => toPick(p, `${p.colour} ${String(p.fabric || '').toLowerCase()} fits the “${clean(theme, 60)}” theme.`));
 }
 export const groupCode = () => Array.from(crypto.getRandomValues(new Uint8Array(6)), b => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[b % 32]).join('');
+
+// ---------- Homepage "Ask the 4L stylist" search ----------
+
+export type ShopQuery = {budget: number; colours: string[]; occasions: string[]; formality?: Want['formality']; airy: boolean; categories: string[]; avoid: string[]};
+const COLOUR_WORDS = ['ivory', 'white', 'cream', 'black', 'navy', 'blue', 'wine', 'maroon', 'red', 'rose', 'pink', 'gold', 'yellow', 'sage', 'green', 'mint', 'grey', 'beige', 'peach', 'purple', 'lilac', 'orange', 'mustard', 'teal'];
+const OCCASION_WORDS: [RegExp, string][] = [[/\beid\b|ramadan|iftar/, 'Eid'], [/wedding|nikah|mehendi|mehndi|sangeet|reception|engagement/, 'Wedding'], [/onam|kerala|kasavu|vishu/, 'Onam'], [/everyday|daily|casual|office|work|school|mall|errand/, 'Everyday']];
+const CATEGORY_WORDS: [RegExp, string][] = [[/salwar|churidar/, 'Salwar suits'], [/kurta|kurti|tunic/, 'Kurtas & sets'], [/anarkali|occasion|party|festive|gown/, 'Occasion wear'], [/co-?ord|essential|lounge/, 'Everyday essentials']];
+
+/** Reads a free-text shopping request ("breezy ivory kurta for the office under 200, no black"). */
+export function parseShopQuery(q: string): ShopQuery {
+  const t = ` ${String(q || '').toLowerCase()} `;
+  const money = t.match(/(?:under|below|less than|max(?:imum)?|within|upto|up to|budget(?: of| is)?|<)\s*(?:qar|qr|riyals?)?\s*(\d{2,5})/) || t.match(/(\d{2,5})\s*(?:qar|qr|riyals?)/);
+  const avoid = COLOUR_WORDS.filter(c => new RegExp(`(?:no|not|avoid|without|except|hate)\\s+(?:any\\s+)?${c}\\b`).test(t));
+  const colours = COLOUR_WORDS.filter(c => new RegExp(`\\b${c}\\b`).test(t) && !avoid.includes(c));
+  const occasions = [...new Set(OCCASION_WORDS.filter(([r]) => r.test(t)).map(([, o]) => o))];
+  const categories = [...new Set(CATEGORY_WORDS.filter(([r]) => r.test(t)).map(([, c]) => c))];
+  const formality: Want['formality'] = /wedding|reception|formal|gala|nikah/.test(t) ? 'formal' : /eid|festive|party|onam|diwali|celebrat/.test(t) ? 'festive' : /office|work|meeting|smart/.test(t) ? 'smart' : /casual|everyday|daily|mall|lounge/.test(t) ? 'casual' : undefined;
+  const airy = /hot|heat|summer|breez|light|cool|humid|outdoor|beach|airy|breath/.test(t);
+  return {budget: money ? Number(money[1]) : 0, colours, occasions, formality, airy, categories, avoid};
+}
+export const shopWant = (s: ShopQuery): Want => ({occasions: s.occasions, formality: s.formality, prefer: [...s.colours, ...s.categories.map(c => c.toLowerCase())], avoid: s.avoid, airy: s.airy, sweatSafe: s.airy, modest: 1, budget: s.budget || undefined});
+
+export function styleSearchFallback(question: string, products: QProduct[], month = qatarMonth()) {
+  const s = parseShopQuery(question), cl = climateFor(month), hot = s.airy || cl.season !== 'cool';
+  const inBudget = s.budget ? products.filter(p => p.price <= s.budget) : products;
+  const pool = inBudget.length >= 2 ? inBudget : products;
+  const picks = topPicks(pool, {...shopWant(s), airy: hot, sweatSafe: hot}, 4, p => {
+    const bits = [`${p.fit || 'Easy'} ${String(p.fabric || '').toLowerCase()} in ${String(p.colour || '').toLowerCase()}`];
+    if (s.occasions.some(o => String(p.occasion || '').includes(o))) bits.push(`made for ${s.occasions.join(' and ').toLowerCase()}`);
+    else if (hot && AIRY.test(String(p.fabric || ''))) bits.push(`breathable for ${cl.month} in Doha`);
+    if (s.budget && p.price <= s.budget) bits.push(`within your QAR ${s.budget}`);
+    return bits.join(', ') + '.';
+  });
+  const what = [s.colours.length ? s.colours.join(' or ') : '', s.categories.length ? s.categories.join(' or ').toLowerCase() : 'pieces'].filter(Boolean).join(' ');
+  const answer = `Here are ${what}${s.occasions.length ? ' for ' + s.occasions.join(' and ').toLowerCase() : ''}${s.budget ? ` under QAR ${s.budget}` : ''}`
+    + `${hot ? `, chosen to stay comfortable at ${cl.high}°C` : ''}.${s.budget && inBudget.length < 2 ? ' Few pieces sit within that budget, so we included our closest matches.' : ''}`;
+  return {query: s, answer, picks};
+}

@@ -3,7 +3,7 @@
 // every pick is validated and topped up from the rule-based ranking.
 import {aiJson, type AiBinding} from './workers-ai';
 import {PLACES, GENERAL_NORMS, findPlaces, climateFor, dressGuideFallback, monthWardrobe, festivalWant, topPicks, mergePicks, cleanList, scoreFor,
-  WELCOME_SECTIONS, themePicks, type QProduct, type Pick, type Festival, type Member} from './qatar';
+  WELCOME_SECTIONS, themePicks, styleSearchFallback, shopWant, type QProduct, type Pick, type Festival, type Member} from './qatar';
 
 export type SizedProduct = QProduct & {sizes?: string[]};
 const PICKS = {type: 'array', items: {type: 'object', properties: {productId: {type: 'string'}, why: {type: 'string'}}, required: ['productId', 'why']}};
@@ -78,4 +78,15 @@ export async function themeMatch(ai: AiBinding | undefined, theme: string, produ
     system: STORE + ' A community group (association, church, school or mosque group) wants matching outfits. Pick up to 4 catalogue pieces that best match their theme, most suitable first, each with a one-line reason.',
     user: `Theme: """${theme.slice(0, 200)}"""\n\nCatalogue:\n${catalogue(products.slice(0, 80))}`});
   return {picks: mergePicks(reply?.picks, products, fallback, 4), source: reply ? 'ai' : 'rules'};
+}
+
+// ---------- Homepage: "Ask the 4L stylist" ----------
+export async function styleSearch(ai: AiBinding | undefined, question: string, products: QProduct[], month: number) {
+  const base = styleSearchFallback(question, products, month), cl = climateFor(month), want = shopWant(base.query);
+  const reply = await aiJson(ai, {maxTokens: 700, schema: {type: 'object', properties: {answer: {type: 'string'}, tips: {type: 'array', items: {type: 'string'}}, picks: PICKS}, required: ['answer', 'picks']},
+    system: STORE + ' A shopper typed a free-text request on the homepage search. Reply in 1-2 friendly sentences explaining what you chose, '
+      + 'then up to 3 short styling tips (accessories, layering for AC, dupatta), then pick the 4 best matching products. Respect any budget (QAR) and colours they want or avoid.',
+    user: `Request: """${question.slice(0, 300)}"""\nMonth: ${cl.month} (Doha ${cl.high}°C day / ${cl.low}°C night).\n\nCatalogue:\n${catalogue(shortlist(products, p => scoreFor(p, want)))}`});
+  const allowed = base.query.budget ? products.filter(p => p.price <= base.query.budget) : products;
+  return {answer: str(reply?.answer, 500) || base.answer, tips: cleanList(reply?.tips, 3), picks: mergePicks(reply?.picks, allowed.length >= 2 ? allowed : products, base.picks, 4), query: base.query, source: reply ? 'ai' : 'rules'};
 }
