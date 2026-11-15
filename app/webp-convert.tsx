@@ -8,6 +8,25 @@ import {upload, addThumb} from './product-photos';
 type Save = (kind: string, id: string, data: Record<string, unknown>) => Promise<unknown>;
 const isMedia = (u: string) => /^\/api\/media\/[a-f0-9-]{36}$/.test(u);
 
+// Runs quietly when the dashboard opens: makes the small phone-size copy for any store
+// photo that lacks one. It only adds copies; product records are not changed.
+export async function ensureThumbs(urls: string[]) {
+  const todo = [...new Set(urls.filter(isMedia))];
+  let made = 0, next = 0;
+  await Promise.all(Array.from({length: Math.min(3, todo.length)}, async () => {
+    while (next < todo.length) {
+      const url = todo[next++];
+      try {
+        const t = await fetch(url + '?w=640', {method: 'HEAD', cache: 'no-store'});
+        if (t.headers.get('X-Thumb') !== '0') continue;
+        const r = await fetch(url, {cache: 'no-store'});
+        if (r.ok && await addThumb(url, await r.blob())) made++;
+      } catch { /* try again next time */ }
+    }
+  }));
+  return made;
+}
+
 export default function WebpConvert({products, settings, save, notify, done}: {
   products: Record<string, unknown>[]; settings: Record<string, unknown>; save: Save; notify: (m: string) => void; done: () => Promise<unknown> | void;
 }) {
