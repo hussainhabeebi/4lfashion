@@ -75,7 +75,7 @@ export default function ProductGallery({images, alt, active, video}: {images: st
         onWheel={() => { pausedUntil.current = Date.now() + RESUME_MS; }}
         onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={endDrag}>
         {images.map((src, i) => <div className="gallery-slide" key={src} aria-label={`Photo ${i + 1} of ${count}`}>
-          <img src={src} alt={i ? alt + ' – view ' + (i + 1) : alt} loading={i ? 'lazy' : 'eager'} draggable={false}
+          <img src={src} alt={i ? alt + ' – view ' + (i + 1) : alt} loading={i ? 'lazy' : 'eager'} fetchPriority={i ? 'low' : 'high'} decoding="async" draggable={false}
             onClick={() => { if (!drag.current?.moved) setZoom(src); }}/>
         </div>)}
       </div>
