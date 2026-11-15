@@ -1,9 +1,14 @@
 import handler from "vinext/server/fetch-handler";
+import { MEDIA_PATH, serveMedia } from "../lib/media-serve";
 import { runWithConnectorBinding } from "../lib/connector-context";
 import type { ConnectorBinding } from "../lib/connector-contract.mjs";
 
 const worker = {
   fetch(request: Request, env: Cloudflare.Env, ctx: ExecutionContext<{ CONNECTORS?: ConnectorBinding }>) {
+    // Store photos skip the website framework entirely: straight from the edge cache or R2.
+    if ((request.method === "GET" || request.method === "HEAD") && MEDIA_PATH.test(new URL(request.url).pathname)) {
+      return serveMedia(request, (env as unknown as { BUCKET?: Parameters<typeof serveMedia>[1] }).BUCKET, p => ctx.waitUntil(p));
+    }
     let binding = ctx.props?.CONNECTORS;
     // Local preview emulates the same request-scoped capability. This branch and
     // the auxiliary service binding are absent from production builds.

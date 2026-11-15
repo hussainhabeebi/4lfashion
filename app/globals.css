@@ -711,3 +711,21 @@ main>section.h-visit{display:grid;grid-template-columns:1fr 1.2fr;gap:0;max-widt
 .m-links button:last-child{border-bottom:0}
 .m-all{display:block;margin:18px 14px 0;width:calc(100% - 28px);padding:15px;border-radius:999px;border:0;background:var(--wine);color:#fff;font-size:14px;font-weight:600}
 @media(min-width:761px){.m-grid{grid-template-columns:repeat(3,1fr)}}
+
+/* Slim text-only hero slider (phones) */
+.m-home>.m-slider{max-width:none;margin:12px 0 0!important;padding:0!important}
+.m-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
+.m-track::-webkit-scrollbar{display:none}
+.m-slide{flex:0 0 100%;width:100%;min-width:0;scroll-snap-align:center;padding:0 14px;box-sizing:border-box}
+.m-card{width:100%;min-width:0;overflow:hidden;height:118px;border-radius:16px;padding:16px 16px 16px 18px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px;box-sizing:border-box}
+.m-card>div{flex:1;min-width:0}
+.m-card small{display:block;font-size:9px;letter-spacing:1.8px;color:#ecd4c6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.m-card h2{margin:6px 0 0;font-family:var(--serif);font-weight:400;font-size:22px;line-height:1.12;color:#fff8ee;letter-spacing:-.3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.m-card button{flex:none;display:inline-flex;align-items:center;gap:6px;border:0;border-radius:999px;background:#faf3e8;color:var(--wine-dark);font-size:12px;font-weight:600;padding:9px 13px;white-space:nowrap}
+.m-card.t1{background:linear-gradient(135deg,#4a1a2c,#651f34 60%,#7d2c44)}
+.m-card.t2{background:linear-gradient(135deg,#5a2a1e,#8a4a2c 60%,#b07a3c)}
+.m-card.t3{background:linear-gradient(135deg,#2c3a33,#3f5a4a 60%,#5d7a62)}
+.m-card.t4{background:linear-gradient(135deg,#2f2a44,#4a3a66 60%,#6a4f80)}
+.m-dots{display:flex;justify-content:center;gap:6px;margin-top:9px}
+.m-dots button{width:6px;height:6px;padding:0;border:0;border-radius:99px;background:#d9cfc6;transition:width .25s,background .25s}
+.m-dots button.on{width:18px;background:var(--wine)}
