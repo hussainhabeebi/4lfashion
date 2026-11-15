@@ -1,6 +1,7 @@
 "use client";
 import {useState} from 'react';
 import {ArrowLeft, ArrowRight, ImagePlus, Star, X} from 'lucide-react';
+import {toWebp} from '../lib/webp';
 
 // Manages a product's photos: the first is the main `image`, the rest are stored
 // in `gallery` (comma-separated), which the storefront shows as thumbnails.
@@ -11,7 +12,7 @@ export const photoList = (image: string, gallery: string) =>
     .filter((s, i, all) => all.indexOf(s) === i);
 
 export async function upload(file: File) {
-  const fd = new FormData(); fd.set('file', file);
+  const fd = new FormData(); fd.set('file', await toWebp(file, file.name));
   const r = await fetch('/api/media', {method: 'POST', body: fd});
   const d = (await r.json().catch(() => ({error: 'Upload failed'}))) as {url?: string; error?: string};
   if (!r.ok || !d.url) throw Error(d.error || 'Upload failed');

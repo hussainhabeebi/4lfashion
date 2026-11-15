@@ -16,7 +16,7 @@ export function SectionHead({eyebrow, title, action, onAction}: {eyebrow: string
 
 function PickCard({p, money, onOpen}: {p: Pick; money: (n: number) => string; onOpen: (id: string) => void}) {
   return <button className="h-pick" onClick={() => onOpen(p.productId)}>
-    <span className="h-pick-img">{p.image && <img src={p.image} alt={p.name} loading="lazy"/>}</span>
+    <span className="h-pick-img">{p.image && <img src={p.image} alt={p.name} loading="lazy" decoding="async"/>}</span>
     <span className="h-pick-body"><b>{p.name}</b><em>{money(p.price)}</em><small><Sparkles size={11}/> {p.why}</small></span>
   </button>;
 }
@@ -134,7 +134,7 @@ export function ShopByPrice({catalog, onShop}: {catalog: HomeProduct[]; onShop: 
   return <section className="h-price">
     <SectionHead eyebrow="BEAUTIFUL AT EVERY BUDGET" title="Shop by price."/>
     <div className="h-price-grid">{bands.map(b => <button key={b.label} onClick={() => onShop(b.max ? {price: String(b.max - 1)} : {})}>
-      {b.image && <img src={b.image} alt="" loading="lazy"/>}<span><small>{b.sub}</small><b>{b.label}</b><em>{b.count} {b.count === 1 ? 'piece' : 'pieces'} <ArrowUpRight size={14}/></em></span></button>)}</div>
+      {b.image && <img src={b.image} alt="" loading="lazy" decoding="async"/>}<span><small>{b.sub}</small><b>{b.label}</b><em>{b.count} {b.count === 1 ? 'piece' : 'pieces'} <ArrowUpRight size={14}/></em></span></button>)}</div>
   </section>;
 }
 export function ShopByColour({catalog, onShop}: {catalog: HomeProduct[]; onShop: (f: Record<string, unknown>) => void}) {

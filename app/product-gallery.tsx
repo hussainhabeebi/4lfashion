@@ -87,7 +87,7 @@ export default function ProductGallery({images, alt, active, video}: {images: st
       </>}
     </div>
     {count > 1 && <div className="gallery-thumbnails">{images.map((src, i) =>
-      <button type="button" key={src} className={i === index ? 'on' : ''} aria-label={'Show photo ' + (i + 1)} onClick={() => goTo(i)}><img src={src} alt=""/></button>)}</div>}
+      <button type="button" key={src} className={i === index ? 'on' : ''} aria-label={'Show photo ' + (i + 1)} onClick={() => goTo(i)}><img src={src} alt="" loading="lazy" decoding="async"/></button>)}</div>}
     <small>Swipe or use the arrows to see more · tap a photo to zoom</small>
     {video && <video controls src={video}/>}
     {zoom && <div className="gallery-zoom" role="dialog" aria-label="Zoomed photo" onClick={() => setZoom(null)}>
