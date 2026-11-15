@@ -1,9 +1,10 @@
 "use client";
 import {useState} from 'react';
-import {upload} from './product-photos';
+import {upload, addThumb} from './product-photos';
 
 // One-off tool: re-saves every photo already uploaded to the store (product photos and
-// homepage category photos) as WebP. New uploads are converted automatically.
+// homepage category photos) as WebP, plus a small 640px copy for product cards.
+// New uploads get both automatically.
 type Save = (kind: string, id: string, data: Record<string, unknown>) => Promise<unknown>;
 const isMedia = (u: string) => /^\/api\/media\/[a-f0-9-]{36}$/.test(u);
 
@@ -21,6 +22,10 @@ export default function WebpConvert({products, settings, save, notify, done}: {
     if (blob.type !== 'image/webp') {
       const file = new File([blob], 'photo', {type: blob.type});
       next = await upload(file);
+    } else {
+      // Already WebP: make sure the small card-size copy exists too.
+      const t = await fetch(url + '?w=640', {method: 'HEAD', cache: 'no-store'});
+      if (t.headers.get('X-Thumb') === '0') await addThumb(url, blob);
     }
     cache.set(url, next);
     return next;
@@ -50,13 +55,13 @@ export default function WebpConvert({products, settings, save, notify, done}: {
       }
       if (catChanged) { await save('settings', 'store-settings', {...settings, categoryImages: cats}); changed++; }
       await done();
-      notify(failed ? changed + ' updated, ' + failed + ' could not be converted. Try again.' : changed ? 'All photos are now WebP (' + changed + ' updated).' : 'All photos are already WebP.');
+      notify(failed ? changed + ' updated, ' + failed + ' could not be converted. Try again.' : changed ? 'Photos optimised (' + changed + ' updated).' : 'All photos are already optimised.');
     } catch (e) { notify(e instanceof Error ? e.message : 'Conversion failed'); }
     setStatus('');
   }
 
   return <div className="between webp-convert">
-    <div><h3>Faster photos</h3><small className="muted">New uploads are saved as WebP automatically. Convert photos uploaded earlier to WebP so pages load faster.</small></div>
-    <button type="button" className="outline" disabled={!!status} onClick={run}>{status || 'Convert existing photos to WebP'}</button>
+    <div><h3>Faster photos</h3><small className="muted">New uploads are saved as WebP with a small phone-size copy automatically. Run this once to optimise photos uploaded earlier.</small></div>
+    <button type="button" className="outline" disabled={!!status} onClick={run}>{status || 'Optimise existing photos'}</button>
   </div>;
 }

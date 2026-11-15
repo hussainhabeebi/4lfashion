@@ -2,6 +2,7 @@
 // Extra homepage sections: AI stylist search, AI tools, this month in Doha, personal picks,
 // product rails, shop by price / colour, offers, services and the Doha store visit.
 import {useEffect, useRef, useState, type ReactNode} from 'react';
+import {thumb} from '../lib/media';
 import {Sparkles, ArrowUpRight, Search, Loader2, Thermometer, CalendarHeart, Camera, MapPin, Ruler, Heart, Clock, Tag, Copy, Truck, Phone, MessageCircle, Gift, PackageSearch, HelpCircle, BookOpen, Wand2} from 'lucide-react';
 import {forYou, readViewed, priceBands, colourSwatches, swatchColour, discount, type HomeProduct} from '../lib/home';
 
@@ -16,7 +17,7 @@ export function SectionHead({eyebrow, title, action, onAction}: {eyebrow: string
 
 function PickCard({p, money, onOpen}: {p: Pick; money: (n: number) => string; onOpen: (id: string) => void}) {
   return <button className="h-pick" onClick={() => onOpen(p.productId)}>
-    <span className="h-pick-img">{p.image && <img src={p.image} alt={p.name} loading="lazy" decoding="async"/>}</span>
+    <span className="h-pick-img">{p.image && <img src={thumb(p.image)} alt={p.name} loading="lazy" decoding="async"/>}</span>
     <span className="h-pick-body"><b>{p.name}</b><em>{money(p.price)}</em><small><Sparkles size={11}/> {p.why}</small></span>
   </button>;
 }
@@ -134,7 +135,7 @@ export function ShopByPrice({catalog, onShop}: {catalog: HomeProduct[]; onShop: 
   return <section className="h-price">
     <SectionHead eyebrow="BEAUTIFUL AT EVERY BUDGET" title="Shop by price."/>
     <div className="h-price-grid">{bands.map(b => <button key={b.label} onClick={() => onShop(b.max ? {price: String(b.max - 1)} : {})}>
-      {b.image && <img src={b.image} alt="" loading="lazy" decoding="async"/>}<span><small>{b.sub}</small><b>{b.label}</b><em>{b.count} {b.count === 1 ? 'piece' : 'pieces'} <ArrowUpRight size={14}/></em></span></button>)}</div>
+      {b.image && <img src={thumb(b.image)} alt="" loading="lazy" decoding="async"/>}<span><small>{b.sub}</small><b>{b.label}</b><em>{b.count} {b.count === 1 ? 'piece' : 'pieces'} <ArrowUpRight size={14}/></em></span></button>)}</div>
   </section>;
 }
 export function ShopByColour({catalog, onShop}: {catalog: HomeProduct[]; onShop: (f: Record<string, unknown>) => void}) {
