@@ -189,3 +189,32 @@ export function StoreVisit({cfg}: {cfg: Record<string, any>}) {
     </div>
   </section>;
 }
+
+// ---------- Slim text-only hero slider (phones) ----------
+// No photos, so it paints instantly. Swipe or wait; it advances every 5 seconds
+// (not for people who ask their device for reduced motion).
+type Slide = {eyebrow: string; title: string; action: string; onClick: () => void; tone: string};
+export function HeroSlider({slides}: {slides: Slide[]}) {
+  const track = useRef<HTMLDivElement>(null), [index, setIndex] = useState(0), touched = useRef(0);
+  const goTo = (i: number) => { const t = track.current; if (t) t.scrollTo({left: i * t.clientWidth, behavior: 'smooth'}); };
+  useEffect(() => {
+    if (slides.length < 2 || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const timer = setInterval(() => {
+      const t = track.current;
+      if (!t || Date.now() - touched.current < 6000 || document.hidden) return;
+      const i = Math.round(t.scrollLeft / t.clientWidth);
+      goTo((i + 1) % slides.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [slides.length]);
+  return <section className="m-slider" aria-roledescription="carousel" aria-label="Highlights">
+    <div className="m-track" ref={track} onPointerDown={() => { touched.current = Date.now(); }} onTouchStart={() => { touched.current = Date.now(); }}
+      onScroll={e => { const t = e.currentTarget; setIndex(Math.round(t.scrollLeft / Math.max(1, t.clientWidth))); }}>
+      {slides.map((s, i) => <div className="m-slide" key={i} role="group" aria-roledescription="slide" aria-label={(i + 1) + ' of ' + slides.length}>
+        <div className={'m-card ' + s.tone}><div><small>{s.eyebrow}</small><h2>{s.title}</h2></div>
+        <button onClick={s.onClick}>{s.action} <ArrowUpRight size={15}/></button></div>
+      </div>)}
+    </div>
+    {slides.length > 1 && <div className="m-dots">{slides.map((_, i) => <button key={i} aria-label={'Show slide ' + (i + 1)} className={i === index ? 'on' : ''} onClick={() => { touched.current = Date.now(); goTo(i); }}/>)}</div>}
+  </section>;
+}
