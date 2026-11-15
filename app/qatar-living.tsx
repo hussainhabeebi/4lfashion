@@ -2,6 +2,7 @@
 // "Life in Qatar" hub for expat shoppers: this month's AC-to-heat wardrobe, Qatar dress-sense
 // guide, festival-far-from-home kits, new-to-Qatar welcome kit and community group orders.
 import {useEffect, useState} from 'react';
+import {thumb} from '../lib/media';
 import {Sparkles, Sun, Snowflake, MapPin, CalendarHeart, Users, Gift, Phone, Share2, Copy, Trash2, Video, ShieldCheck, Plus, X, ArrowUpRight} from 'lucide-react';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- matches the storefront's untyped api() helper
@@ -16,7 +17,7 @@ async function getJson(action: string, params = ''): Promise<any> { const r = aw
 function Picks({picks, money, onOpen, label}: {picks: (Pick & {member?: string})[]; money: (n: number) => string; onOpen: (id: string) => void; label?: string}) {
   if (!picks?.length) return null;
   return <div className="q-picks">{picks.map((p, i) => <button key={p.productId + i} className="q-pick" onClick={() => onOpen(p.productId)}>
-    <span className="q-pick-img">{p.image && <img src={p.image} alt="" loading="lazy" decoding="async"/>}</span>
+    <span className="q-pick-img">{p.image && <img src={thumb(p.image)} alt="" loading="lazy" decoding="async"/>}</span>
     <span>{(label || p.member) && <small className="eyebrow">{p.member ? 'FOR ' + p.member.toUpperCase() : label}</small>}<b>{p.name}</b><em>{money(p.price)}</em><small>{p.why}</small></span>
     <ArrowUpRight size={15}/></button>)}</div>;
 }
@@ -159,7 +160,7 @@ function GroupsTab({api, money, notify, user}: Common & {user: {displayName?: st
         <h3>1. Theme</h3>
         <div className="q-ask"><input value={theme} maxLength={200} onChange={e => setTheme(e.target.value)} placeholder="e.g. All ladies in kasavu with green borders"/><button type="button" className="outline" disabled={busy || theme.trim().length < 3} onClick={match}><Sparkles size={15}/>Find matching pieces</button></div>
         {matches && <div className="q-choose">{matches.map(p => <label key={p.productId} className={chosen.includes(p.productId) ? 'on' : ''}><input type="checkbox" checked={chosen.includes(p.productId)} onChange={e => setChosen(c => e.target.checked ? [...c, p.productId].slice(0, 4) : c.filter(x => x !== p.productId))}/>
-          {p.image && <img src={p.image} alt="" loading="lazy" decoding="async"/>}<span><b>{p.name}</b><em>{money(p.price)}</em><small>{p.why}</small></span></label>)}</div>}
+          {p.image && <img src={thumb(p.image)} alt="" loading="lazy" decoding="async"/>}<span><b>{p.name}</b><em>{money(p.price)}</em><small>{p.why}</small></span></label>)}</div>}
         <h3>2. Details</h3>
         <div className="form-grid">
           <label>Group name<input name="name" required maxLength={80} placeholder="Ladies’ wing · Onam 2027"/></label>
@@ -194,7 +195,7 @@ export function GroupPage({code, api, money, notify, onOpen, variants, whatsapp}
     <p className="muted">{[g.organisation, g.event, g.date && 'on ' + new Date(g.date).toLocaleDateString('en-GB', {day: 'numeric', month: 'long', year: 'numeric'})].filter(Boolean).join(' · ')}{g.theme && <> · Theme: “{g.theme}”</>}</p>
     <div className="q-status"><span className={'badge ' + (open ? 'green' : '')}>{open ? 'Taking sizes until ' + new Date(g.deadline).toLocaleDateString('en-GB', {day: 'numeric', month: 'short'}) : g.status === 'open' ? 'Deadline passed' : g.status}</span>
       <span>{t.pieces} pieces · {t.percent ? t.percent + '% group discount' : 'No discount yet'}</span>{t.next && <span className="muted">{t.next.more} more {t.next.more === 1 ? 'piece' : 'pieces'} unlocks {t.next.percent}% off</span>}</div>
-    <div className="q-group-products">{g.products.map((p: Pick & {id: string}) => <button key={p.id} className={pid === p.id ? 'selected' : ''} onClick={() => { setPid(p.id); setColour(''); }}>{p.image && <img src={p.image} alt="" loading="lazy" decoding="async"/>}<b>{p.name}</b><em>{money(p.price)}</em></button>)}</div>
+    <div className="q-group-products">{g.products.map((p: Pick & {id: string}) => <button key={p.id} className={pid === p.id ? 'selected' : ''} onClick={() => { setPid(p.id); setColour(''); }}>{p.image && <img src={thumb(p.image)} alt="" loading="lazy" decoding="async"/>}<b>{p.name}</b><em>{money(p.price)}</em></button>)}</div>
     {open && <form className="q-join" onSubmit={async e => { e.preventDefault(); const f = Object.fromEntries(new FormData(e.currentTarget)); setBusy(true);
       try { await api('groupJoin', {code: g.code, ...f, productId: pid, colour: col, qty: Number(f.qty)}); notify('You’re in! Your size has been added.'); (e.target as HTMLFormElement).reset(); load(); } catch (er) { notify(err(er, 'Could not add your size')); } finally { setBusy(false); } }}>
       <h3>Add your size</h3>

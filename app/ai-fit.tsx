@@ -2,6 +2,7 @@
 // Storefront UI for the Workers AI features: fit memory notes, "Fits like my favourite"
 // photo matching and the occasion planner. Logic lives in lib/fit-ai.ts.
 import {useState} from 'react';
+import {thumb} from '../lib/media';
 import {Camera, Sparkles, Ruler, X, ArrowUpRight, CalendarHeart, CloudSun, Landmark, RotateCcw} from 'lucide-react';
 import {fitAdvice, matchFavourite, sanitizeMeasure, sortSizes, type FitProfile, type GarmentMeasure, type FavouriteMatch, type PlannedLook, type OccasionBrief} from '../lib/fit-ai';
 import {chartFor} from '../lib/size-charts';
@@ -97,7 +98,7 @@ export function FavouriteMatcher({products, variants, cfg, current, api, onSelec
     <button className="primary" onClick={find}>Find my matches</button>
     {here && current && <div className="fit-note good"><Sparkles size={16}/><div><p>For {current.name}: {here.note}</p><button className="outline" onClick={() => { onSelect(current, here.size); onClose(); }}>Select size {here.size}</button></div></div>}
     {results && (results.length ? <div className="favourite-results">{results.map(r => { const p = listed.find(x => x.id === r.productId)!; return <button key={r.productId} onClick={() => { onSelect(p, r.size); onClose(); }}>
-      {r.image && <img src={r.image} alt="" loading="lazy" decoding="async"/>}<div><b>{r.name}</b><span className="badge">Size {r.size}</span><small>{r.note}</small></div><ArrowUpRight size={16}/></button>; })}</div>
+      {r.image && <img src={thumb(r.image)} alt="" loading="lazy" decoding="async"/>}<div><b>{r.name}</b><span className="badge">Size {r.size}</span><small>{r.note}</small></div><ArrowUpRight size={16}/></button>; })}</div>
       : <p className="muted">No in-stock pieces have a size chart close to these measurements. Message us on WhatsApp and our team will help.</p>)}
   </div></div>;
 }
@@ -132,7 +133,7 @@ export function OccasionPlanner({api, money, onOpen, notify}: {api: Api; money: 
       {b.weather && <p className="planner-note"><CloudSun size={16}/> {b.weather}</p>}
       {b.culture && <p className="planner-note"><Landmark size={16}/> {b.culture}</p>}
       <div className="planner-looks">{plan.looks.map((l, i) => <article key={i} className="planner-look">
-        <button className="look-image" onClick={() => onOpen(l.productId)}>{l.image && <img src={l.image} alt={l.name} loading="lazy" decoding="async"/>}</button>
+        <button className="look-image" onClick={() => onOpen(l.productId)}>{l.image && <img src={thumb(l.image)} alt={l.name} loading="lazy" decoding="async"/>}</button>
         <div><small className="eyebrow">LOOK {i + 1} · {l.event.name}{l.event.time && ' · ' + l.event.time}{l.event.setting && ' · ' + l.event.setting}</small>
           <h3>{l.name}</h3><p className="pdp-price">{money(l.price)}</p><p>{l.why}</p>
           <ul>{l.styling.map((s, j) => <li key={j}>{s}</li>)}</ul>

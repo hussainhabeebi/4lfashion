@@ -13,10 +13,19 @@ export const photoList = (image: string, gallery: string) =>
 
 export async function upload(file: File) {
   const fd = new FormData(); fd.set('file', await toWebp(file, file.name));
+  const small = await toWebp(file, file.name, 640, 0.76); if (small.type === 'image/webp') fd.set('thumb', small);
   const r = await fetch('/api/media', {method: 'POST', body: fd});
   const d = (await r.json().catch(() => ({error: 'Upload failed'}))) as {url?: string; error?: string};
   if (!r.ok || !d.url) throw Error(d.error || 'Upload failed');
   return d.url;
+}
+
+// Makes the small card-size WebP for a photo uploaded before thumbnails existed.
+export async function addThumb(url: string, file: Blob) {
+  const key = url.split('/').pop() || '', small = await toWebp(file, 'thumb', 640, 0.76);
+  if (small.type !== 'image/webp') return false;
+  const fd = new FormData(); fd.set('thumbFor', key); fd.set('thumb', small);
+  return (await fetch('/api/media', {method: 'POST', body: fd})).ok;
 }
 
 export default function ProductPhotos({image, gallery, onChange, notify}: {

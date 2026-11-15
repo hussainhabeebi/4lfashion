@@ -675,5 +675,11 @@ main>section.h-visit{display:grid;grid-template-columns:1fr 1.2fr;gap:0;max-widt
 .hero.no-image .hero-shade,.hero.no-image .hero-pagination{display:none}
 .hero.no-image .hero-copy{padding:96px 7% 96px;max-width:760px}
 @media(min-width:1024px){.hero.no-image .hero-copy{padding:96px 72px;max-width:760px}.hero.no-image .hero-side{display:block}}
-@media(max-width:760px){.hero.no-image .hero-copy{padding:44px 24px 40px}.hero.no-image .hero-side{right:10px;top:50%;transform:translateY(-50%)}}
+@media(max-width:760px){.hero.no-image .hero-copy{padding:30px 22px 28px}.hero.no-image h1{font-size:38px;line-height:1.05;margin:12px 0}.hero.no-image p{margin:0 0 18px}.hero.no-image .hero-side{right:10px;top:50%;transform:translateY(-50%)}}
 .webp-convert{gap:16px;align-items:center;flex-wrap:wrap;margin:18px 0}
+
+/* Loading placeholders: product photos show a soft shimmer until they arrive */
+.product-image,.app-category-scroll span,.h-pick-img{background:linear-gradient(100deg,#efe9e1 30%,#f7f3ee 50%,#efe9e1 70%) 0 0/300% 100%}
+.page-loading{min-height:60vh}
+/* Phones: skip layout/paint work for homepage sections until they scroll near the screen */
+@media(max-width:760px){main>section:not(.hero):not(:first-child){content-visibility:auto;contain-intrinsic-size:auto 640px}}
