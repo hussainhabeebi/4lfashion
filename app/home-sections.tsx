@@ -1,9 +1,9 @@
 "use client";
 // Extra homepage sections: AI stylist search, AI tools, this month in Doha, personal picks,
 // product rails, shop by price / colour, offers, services and the Doha store visit.
-import {useEffect, useRef, useState, type ReactNode} from 'react';
+import {useEffect, useRef, useState, type ReactNode, type CSSProperties} from 'react';
 import {thumb} from '../lib/media';
-import {Sparkles, ArrowUpRight, Search, Loader2, Thermometer, CalendarHeart, Camera, MapPin, Ruler, Heart, Clock, Tag, Copy, Truck, Phone, MessageCircle, Gift, PackageSearch, HelpCircle, BookOpen, Wand2} from 'lucide-react';
+import {Sparkles, ArrowUpRight, Search, Loader2, Thermometer, CalendarHeart, Camera, MapPin, Ruler, Heart, Clock, Tag, Copy, Truck, Phone, MessageCircle, Gift, PackageSearch, HelpCircle, BookOpen, Wand2, ArrowRight} from 'lucide-react';
 import {forYou, readViewed, priceBands, colourSwatches, swatchColour, discount, type HomeProduct} from '../lib/home';
 
 type Api = (action: string, data?: Record<string, unknown>) => Promise<any>;
@@ -216,5 +216,50 @@ export function HeroSlider({slides}: {slides: Slide[]}) {
       </div>)}
     </div>
     {slides.length > 1 && <div className="m-dots">{slides.map((_, i) => <button key={i} aria-label={'Show slide ' + (i + 1)} className={i === index ? 'on' : ''} onClick={() => { touched.current = Date.now(); goTo(i); }}/>)}</div>}
+  </section>;
+}
+
+// ---------- Hanger hero: pieces hanging from a curved rail ----------
+// Tap a piece once to turn it (shows name and price on the back), tap again to open it.
+// Uses the same thumbnails as the product grid below, so it adds no extra photo downloads.
+type HangerProduct = {id: string; name: string; price: number; image?: string; colour?: string; category?: string};
+export function HangerHero({products, money, onOpen, onShop, eyebrow, tagline, title, subtitle, action}: {
+  products: HangerProduct[]; money: (n: number) => string; onOpen: (p: any) => void; onShop: () => void;
+  eyebrow: string; tagline: string; title: string; subtitle?: string; action: string;
+}) {
+  const [turned, setTurned] = useState(-1);
+  const pieces = products.filter(p => p.image).slice(0, 4);
+  const n = pieces.length;
+  return <section className="hanger-hero" aria-label={eyebrow}>
+    <div className="hh-head"><b>{eyebrow}</b><span/><small>{tagline}</small></div>
+    <div className="hh-stage" onClick={e => { if (e.target === e.currentTarget) setTurned(-1); }}>
+      <svg className="hh-rail" viewBox="0 0 100 20" preserveAspectRatio="none" aria-hidden="true">
+        <defs><linearGradient id="hhRail" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#f4f1ee"/><stop offset=".5" stopColor="#9b938d"/><stop offset="1" stopColor="#5d5652"/></linearGradient></defs>
+        <path d="M-2 3 Q50 19 102 3" fill="none" stroke="url(#hhRail)" strokeWidth="2.4" vectorEffect="non-scaling-stroke" strokeLinecap="round"/>
+      </svg>
+      <div className="hh-row">
+        {pieces.map((p, i) => {
+          const t = (i + .5) / n, sag = 4 * t * (1 - t);
+          const on = turned === i;
+          return <button key={p.id} className={'hh-piece' + (on ? ' on' : '')} style={{'--sag': sag.toFixed(3), '--i': i} as CSSProperties}
+            aria-label={on ? 'Open ' + p.name : 'Turn ' + p.name + ', ' + money(p.price)}
+            onClick={() => on ? onOpen(p) : setTurned(i)}>
+            <span className="hh-swing">
+              <svg className="hh-hanger" viewBox="0 0 60 34" aria-hidden="true"><path d="M30 13 V8 a4.5 4.5 0 1 1 4.5 -4.5" fill="none" stroke="#8d8781" strokeWidth="1.6" strokeLinecap="round"/><path d="M30 13 L4 31 Q2 33 5 33 H55 Q58 33 56 31 Z" fill="none" stroke="#a49d97" strokeWidth="1.6" strokeLinejoin="round"/></svg>
+              <span className="hh-tag">{money(p.price).replace('QAR ', 'QAR ')}</span>
+              <span className="hh-flip">
+                <span className="hh-face hh-front"><img src={thumb(p.image)} alt="" loading={i < 2 ? 'eager' : 'lazy'} fetchPriority={i < 2 ? 'high' : 'low'} decoding="async" draggable={false}/></span>
+                <span className="hh-face hh-back"><img src={thumb(p.image)} alt="" loading="lazy" decoding="async" draggable={false}/><span><small>{p.category || p.colour}</small><b>{p.name}</b><i>Look closer <ArrowUpRight size={12}/></i></span></span>
+              </span>
+            </span>
+          </button>;
+        })}
+      </div>
+    </div>
+    <div className="hh-foot">
+      <p className="hh-hint"><span/>Tap a piece to turn it · tap again to look closer</p>
+      <div className="hh-copy"><h1>{title}</h1>{subtitle && <p>{subtitle}</p>}
+        <button onClick={onShop}>{action} <ArrowRight size={16}/></button></div>
+    </div>
   </section>;
 }
