@@ -77,5 +77,55 @@ You can ask us for a copy of the personal data we hold about you, ask us to corr
 ## Where your data is sent
 
 Your data is processed by the services listed above, which may store it on servers outside Qatar. We only share what each service needs to do its job.`;
-export function withCurrentPolicies<T extends Record<string,any>>(settings:T):T{if(Number(settings?.privacyPolicyVersion)>=PRIVACY_POLICY_VERSION)return settings;return {...settings,privacyPolicyVersion:PRIVACY_POLICY_VERSION,policies:{...(settings?.policies||{}),Privacy:PRIVACY_POLICY}};}
-export const initialSettings={privacyPolicyVersion:PRIVACY_POLICY_VERSION,name:'4L Fashion',currency:'QAR',announcement:'',heroTitle:'For every version of you.',heroSubtitle:'Thoughtfully chosen. Beautifully worn. Discover a wardrobe that feels like you.',shipping:10,freeShipping:0,coupon:'WELCOME10',couponPercent:10,whatsapp:'97431480006',email:'info@4LFashion.com.qa',address:'Al Mana Building, Building 70, Zone 26, Street 310, Old Airport Street, Doha, Qatar',headerLocation:"Doha, Qatar",navSaleLabel:"The sale edit",heroEyebrow:"ROOTED IN TRADITION. STYLED FOR TODAY.",heroButton:"Explore the new collection",heroNote:"THE NEW SEASON EDIT — 2026",benefits:"Quick delivery across Qatar\nPersonal support for size exchanges\nThoughtfully curated, always",newsletterEyebrow:"A LITTLE SOMETHING, JUST FOR YOU",newsletterTitle:"Good style. Better company.",newsletterText:"New collections, styling notes and lovely little surprises. In your inbox.",footerTagline:"Everyday elegance.\nExtraordinary you.",footerLocation:"DOHA, QATAR",footerContactTitle:"Come say hello",footerAddress:"Al Mana Building · No. 70\nZone 26 · Street 310\nOld Airport Street, Doha, Qatar",footerPhones:"+974 3148 0006\n+974 3148 0005",footerCopyright:"Wear your story.",footerBottomNote:"Qatar · QAR",sizeChart:[{size:'M',bust:36,waist:30,hip:40},{size:'L',bust:38,waist:32,hip:42},{size:'XL',bust:40,waist:34,hip:44},{size:'XXL',bust:42,waist:36,hip:46},{size:'3XL',bust:44,waist:38,hip:48},{size:'4XL',bust:46,waist:40,hip:50},{size:'5XL',bust:48,waist:42,hip:52}],policies:{Shipping:'Qatar delivery rates and timelines are confirmed at checkout. International delivery is available by enquiry. Contact our Doha team for assistance.',Returns:'Please contact our team with your order number to request a return or size exchange. Items must be unworn with tags attached. Final eligibility and timelines are confirmed by the store.',Privacy:PRIVACY_POLICY,Terms:'Product availability is subject to stock confirmation. Orders placed with cash on delivery are subject to store confirmation. Contact the store for assistance.'}};
+// Terms & conditions shown at /terms, as supplied by the store (typos fixed, lists formatted).
+export const TERMS_POLICY_VERSION=1;
+export const TERMS_POLICY=`The products and services that feature on 4L Fashions are offered to you by https://4lfashion.com.qa/. 4L Fashions is a registered company in Qatar Ministry of Commerce and Industry 251805, and is governed according to Qatar law.
+
+## General
+
+1. Welcome to our website. Please read the Terms and Conditions in full before you use this website. By using 4lfashion.com.qa site, you agree to be bound by these Terms and Conditions.
+2. These Terms and Conditions do not affect your statutory rights.
+3. We reserve the right to change these Terms and Conditions from time to time. All changes will be posted on this page and your use of this website after changes have been posted will constitute your agreement to the modified Terms and Conditions.
+
+## Registration
+
+1. To register with 4lfashion.com.qa, you must be eighteen years old and above.
+2. You must ensure all information provided on registration is correct.
+3. You must inform us immediately of any updates to the information that you provided when registering with us.
+4. 4lfashion.com.qa has the right to suspend or cancel your registration.
+5. 4lfashion.com.qa may suspend or cancel your registration immediately at our reasonable discretion or if you breach any of your obligations under these Terms and Conditions.
+
+## Password and Security
+
+1. You must keep your password confidential and must not share it with anyone.
+2. You are responsible for all activities and orders that are made with your user name and password.
+3. If you suspect anybody is using your user name and password, you should inform us immediately at info@4LFashion.com.qa
+
+## Intellectual Property
+
+1. The content of 4lfashion.com.qa site is protected by copyright, trademarks, database and other intellectual property rights. You may retrieve and display the content of the 4lfashion.com.qa site on a computer screen, store such content in electronic form on disk or print one copy of such content for your own personal, non-commercial use, provided you keep intact all and any copyright and proprietary notices.
+2. You may not reproduce, modify, copy or distribute or use for commercial purposes any of the materials or content on the 4lfashion.com.qa site without permission from 4lfashion.com.qa
+3. No license is granted to you in these Terms and Conditions to use any trademark of 4lfashion.com.qa
+
+## Availability
+
+1. 4lfashion.com.qa aims to offer the best service possible to you, however we make no promise that the services at 4lfashion.com.qa site will meet your requirements. 4lfashion.com.qa cannot guarantee that the service will be fault free.
+2. If a fault occurs in the service, you should report it to us at info@4LFashion.com.qa and we will attempt to correct the fault as soon as we can.
+3. Your access to 4lfashion.com.qa site may be occasionally restricted to allow for repairs, maintenance or the introduction of new facilities or services. We will attempt to restore the service as soon as we can.
+
+## Return/Defect/Cancellation/Warranty
+
+We hope this never happens, and aim for it to never happen.
+
+All products purchased from 4L Fashions are eligible for a return request within **2 hours of delivery**, subject to the following terms and conditions:
+
+- The request must be submitted within 2 hours of receiving the order.
+- Products must be unused, unworn and in their original condition, with all tags attached.
+- Exchanges are subject to inspection and approval.
+- If the requested replacement size is available, we will arrange an exchange.
+- If the required size is unavailable, a refund may be arranged subject to approval.
+- Please contact our support team with your order number and exchange request.`;
+// Saved settings show each current policy until it is next saved in the admin (which keeps
+// the version markers), so later admin edits are kept.
+export function withCurrentPolicies<T extends Record<string,any>>(settings:T):T{const privacy=Number(settings?.privacyPolicyVersion)>=PRIVACY_POLICY_VERSION,terms=Number(settings?.termsPolicyVersion)>=TERMS_POLICY_VERSION;if(privacy&&terms)return settings;return {...settings,privacyPolicyVersion:PRIVACY_POLICY_VERSION,termsPolicyVersion:TERMS_POLICY_VERSION,policies:{...(settings?.policies||{}),...(privacy?{}:{Privacy:PRIVACY_POLICY}),...(terms?{}:{Terms:TERMS_POLICY})}};}
+export const initialSettings={privacyPolicyVersion:PRIVACY_POLICY_VERSION,termsPolicyVersion:TERMS_POLICY_VERSION,name:'4L Fashion',currency:'QAR',announcement:'',heroTitle:'For every version of you.',heroSubtitle:'Thoughtfully chosen. Beautifully worn. Discover a wardrobe that feels like you.',shipping:10,freeShipping:0,coupon:'WELCOME10',couponPercent:10,whatsapp:'97431480006',email:'info@4LFashion.com.qa',address:'Al Mana Building, Building 70, Zone 26, Street 310, Old Airport Street, Doha, Qatar',headerLocation:"Doha, Qatar",navSaleLabel:"The sale edit",heroEyebrow:"ROOTED IN TRADITION. STYLED FOR TODAY.",heroButton:"Explore the new collection",heroNote:"THE NEW SEASON EDIT — 2026",benefits:"Quick delivery across Qatar\nPersonal support for size exchanges\nThoughtfully curated, always",newsletterEyebrow:"A LITTLE SOMETHING, JUST FOR YOU",newsletterTitle:"Good style. Better company.",newsletterText:"New collections, styling notes and lovely little surprises. In your inbox.",footerTagline:"Everyday elegance.\nExtraordinary you.",footerLocation:"DOHA, QATAR",footerContactTitle:"Come say hello",footerAddress:"Al Mana Building · No. 70\nZone 26 · Street 310\nOld Airport Street, Doha, Qatar",footerPhones:"+974 3148 0006\n+974 3148 0005",footerCopyright:"Wear your story.",footerBottomNote:"Qatar · QAR",sizeChart:[{size:'M',bust:36,waist:30,hip:40},{size:'L',bust:38,waist:32,hip:42},{size:'XL',bust:40,waist:34,hip:44},{size:'XXL',bust:42,waist:36,hip:46},{size:'3XL',bust:44,waist:38,hip:48},{size:'4XL',bust:46,waist:40,hip:50},{size:'5XL',bust:48,waist:42,hip:52}],policies:{Shipping:'Qatar delivery rates and timelines are confirmed at checkout. International delivery is available by enquiry. Contact our Doha team for assistance.',Returns:'Please contact our team with your order number to request a return or size exchange. Items must be unworn with tags attached. Final eligibility and timelines are confirmed by the store.',Privacy:PRIVACY_POLICY,Terms:TERMS_POLICY}};
