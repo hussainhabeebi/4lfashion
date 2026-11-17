@@ -15,6 +15,8 @@ export type Order = {
   tracking?: string; carrier?: string; version?: number; timeline?: OrderEvent[];
   originalSubtotal?: number; originalDiscount?: number; originalTotal?: number;
   refundDue?: number; refunded?: number; cancelReason?: string; syncStatus?: string;
+  /** Staff-flagged test order: hidden from sales figures and deletable. */
+  test?: boolean;
 };
 
 export const WRAP_FEE = 1000;

@@ -1,6 +1,6 @@
 "use client";
 import {useMemo, useState} from 'react';
-import {ArrowLeft, Ban, CheckCircle2, Clock, Copy, Mail, MessageCircle, Package, Phone, Printer, Send, StickyNote, Truck, Undo2} from 'lucide-react';
+import {ArrowLeft, Ban, CheckCircle2, Clock, Copy, FlaskConical, Mail, MessageCircle, Package, Phone, Printer, Send, StickyNote, Trash2, Truck, Undo2} from 'lucide-react';
 import {activeQty, customerMessage, FULFILMENT_FLOW, fulfilmentState, itemCount, NOTIFY_EVENTS, paymentState, staffCanCancel, statusEvent, timelineOf, whatsappNumber, type NotifyEvent, type Order} from '../lib/orders';
 import {invoiceHtml, packingHtml, printHtml} from './order-docs';
 
@@ -11,14 +11,17 @@ type Props = {orders: Order[]; products: {id: string; code?: string}[]; variants
   notifyConfig?: {email: boolean; whatsapp: boolean; whatsappTemplate?: boolean}; run: Run; busy: boolean; notify: (m: string) => void; query: string;
   selected: Order | null; onSelect: (o: Order | null) => void};
 
+// Test orders only appear under the "Test orders" tab, so they never mix with real ones.
+const real = (f: (o: Order) => boolean) => (o: Order) => !o.test && f(o);
 const TABS: {key: string; label: string; test: (o: Order) => boolean}[] = [
-  {key: 'all', label: 'All', test: () => true},
-  {key: 'unfulfilled', label: 'Unfulfilled', test: o => ['Confirmed', 'Packing'].includes(o.status)},
-  {key: 'unpaid', label: 'Unpaid', test: o => !o.paid && o.status !== 'Cancelled'},
-  {key: 'shipped', label: 'Shipped', test: o => o.status === 'Shipped'},
-  {key: 'done', label: 'Delivered & completed', test: o => ['Delivered', 'Completed'].includes(o.status)},
-  {key: 'refund', label: 'Refund due', test: o => !!o.refundDue},
-  {key: 'cancelled', label: 'Cancelled', test: o => o.status === 'Cancelled'},
+  {key: 'all', label: 'All', test: real(() => true)},
+  {key: 'unfulfilled', label: 'Unfulfilled', test: real(o => ['Confirmed', 'Packing'].includes(o.status))},
+  {key: 'unpaid', label: 'Unpaid', test: real(o => !o.paid && o.status !== 'Cancelled')},
+  {key: 'shipped', label: 'Shipped', test: real(o => o.status === 'Shipped')},
+  {key: 'done', label: 'Delivered & completed', test: real(o => ['Delivered', 'Completed'].includes(o.status))},
+  {key: 'refund', label: 'Refund due', test: real(o => !!o.refundDue)},
+  {key: 'cancelled', label: 'Cancelled', test: real(o => o.status === 'Cancelled')},
+  {key: 'test', label: 'Test orders', test: o => !!o.test},
 ];
 
 /** Summarise notification results for a toast. */
@@ -36,12 +39,22 @@ export default function OrdersPage(props: Props) {
   }, [orders, tab, query]);
   const current = selected ? orders.find(o => o.id === selected.id) || selected : null;
   if (current) return <OrderDetail {...props} order={current} back={() => onSelect(null)}/>;
+  const testCount = orders.filter(o => o.test).length;
   return <section className="panel orders-page">
+    {tab === 'test' && <div className="test-orders-note">
+      <p className="muted">Test orders are kept out of sales, reports and accounting. Open one to remove the test flag or delete it (stock is returned).</p>
+      {testCount > 0 && <button className="outline danger" disabled={props.busy} onClick={async () => {
+        if (!window.confirm(`Delete all ${testCount} test order(s)? Remaining items go back into stock. This cannot be undone.`)) return;
+        for (const o of orders.filter(x => x.test)) { try { await props.run('orderDelete', {id: o.id}); } catch { return; } }
+        props.notify(`${testCount} test order(s) deleted`);
+      }}><Trash2 size={15}/> Delete all test orders</button>}
+    </div>}
+    {tab !== 'test' && <p className="muted small test-orders-hint">Placed an order to try the shop? Open it and choose <b>Mark as test order</b> to keep it out of your sales.</p>}
     <div className="order-tabs">{TABS.map(t => { const n = orders.filter(t.test).length; return (t.key === 'all' || t.key === tab || n > 0) &&
       <button key={t.key} className={tab === t.key ? 'on' : ''} onClick={() => setTab(t.key)}>{t.label}<span>{n}</span></button>; })}</div>
     <div className="table-scroll"><table className="orders-table"><thead><tr><th>Order</th><th>Date</th><th>Customer</th><th>Channel</th><th>Payment</th><th>Fulfilment</th><th>Items</th><th className="num">Total</th></tr></thead>
       <tbody>{list.map(o => { const pay = paymentState(o), ful = fulfilmentState(o); return <tr key={o.id} onClick={() => onSelect(o)} className="clickable">
-        <td><b>{o.id}</b></td><td>{when(o.created)}</td><td>{o.name}<small className="block muted">{o.phone || o.email}</small></td><td>{o.source || 'Online'}</td>
+        <td><b>{o.id}</b>{o.test && <span className="badge test">Test</span>}</td><td>{when(o.created)}</td><td>{o.name}<small className="block muted">{o.phone || o.email}</small></td><td>{o.source || 'Online'}</td>
         <td><span className={'badge ' + pay.tone}>{pay.label}</span></td><td><span className={'badge ' + ful.tone}>{o.syncStatus || ful.label}</span></td>
         <td>{itemCount(o)}</td><td className="num">{qar(o.total)}</td></tr>; })}</tbody></table>
       {!list.length && <p className="empty">{orders.length ? 'No orders match this view.' : 'No orders yet.'}</p>}</div>
@@ -77,13 +90,19 @@ function OrderDetail({order: o, back, run, busy, notify, settings, notifyConfig,
   return <div className="order-detail">
     <div className="order-head">
       <button className="text-link" onClick={back}><ArrowLeft size={15}/> Orders</button>
-      <div className="order-title"><h2>{o.id}</h2><span className={'badge ' + pay.tone}>{pay.label}</span><span className={'badge ' + ful.tone}>{ful.label}</span></div>
+      <div className="order-title"><h2>{o.id}</h2>{o.test && <span className="badge test">Test order</span>}<span className={'badge ' + pay.tone}>{pay.label}</span><span className={'badge ' + ful.tone}>{ful.label}</span></div>
       <p className="muted">{when(o.created)} · {o.source || 'Online'} · {o.payment}</p>
       <div className="order-actions">
         <button className="outline" onClick={() => doc('invoice')}><Printer size={15}/> Invoice</button>
         {o.source !== 'POS' && <button className="outline" onClick={() => doc('packing')}><Printer size={15}/> Packing list</button>}
         {staffCanCancel(o) && <button className="outline danger" onClick={() => { setCancelMode('all'); setReason(''); }}><Ban size={15}/> Cancel order</button>}
+        <button className="outline" disabled={busy} onClick={() => act('orderTest', {test: !o.test}, () => notify(o.test ? 'Test flag removed' : 'Marked as test order'))}><FlaskConical size={15}/> {o.test ? 'Not a test order' : 'Mark as test order'}</button>
+        {o.test && <button className="outline danger" disabled={busy} onClick={async () => {
+          if (!window.confirm(`Delete test order ${o.id}?${o.status !== 'Cancelled' && itemCount(o) ? ` ${itemCount(o)} item(s) go back into stock.` : ''} This cannot be undone.`)) return;
+          try { await run('orderDelete', {id: o.id}); notify('Test order deleted'); back(); } catch { /* run() shows the error */ }
+        }}><Trash2 size={15}/> Delete test order</button>}
       </div>
+      {o.test && <p className="muted small">This is a test order. It is not counted in sales, reports or accounting.</p>}
     </div>
 
     {cancelMode === 'all' && <section className="panel cancel-box">
