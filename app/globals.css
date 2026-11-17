@@ -767,3 +767,6 @@ main>section.h-visit{display:grid;grid-template-columns:1fr 1.2fr;gap:0;max-widt
 @media(max-width:760px){.hanger-hero{padding:22px 14px 22px!important}.hh-head{gap:9px;font-size:9px;letter-spacing:1.8px}.hh-head small{font-size:9px}.hh-stage{margin-top:22px;--rail:30px}.hh-row{gap:3%;padding:0 2%}.hh-tag{top:18px;font-size:8px;padding:2px 4px 1px}.hh-back>span{padding:6px}.hh-back b{font-size:11px}.hh-back small{font-size:6.5px;letter-spacing:.8px}.hh-back i{font-size:8px;margin-top:2px;padding-top:4px}.hh-foot{margin-top:26px;gap:14px}.hh-hint{font-size:10px;max-width:130px}.hh-hint span{display:block;margin:0 0 6px}.hh-copy h1{font-size:21px;letter-spacing:-.3px}.hh-copy p{display:none}.hh-copy button{font-size:11px;margin-top:10px;gap:7px}}
 
 .whatsapp:hover{background:#1EBE5D;opacity:1}
+.badge.test{background:#ece8f6;color:#5d4d8c;margin-left:6px}
+.test-orders-note{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}.test-orders-note p{margin:0;flex:1;min-width:200px}
+.test-orders-hint{margin:0 0 12px}

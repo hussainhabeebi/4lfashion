@@ -89,6 +89,16 @@ assert.equal((await post('orderStatus',{id:id2,status:'Shipped'})).status,400,'c
 // Admin payload reports which providers are configured
 const admin=(await get('admin')).data;assert.deepEqual(admin.notifyConfig,{email:true,whatsapp:true,whatsappTemplate:true});
 
+// Test orders: only staff can flag; only flagged orders can be deleted; deletion returns stock
+as(alice);const st=stock('p2-L');r=await post('checkout',{requestId:crypto.randomUUID(),name:'Alice',email:alice.email,phone:'55551234',address:'B1',items:[{variant:'p2-L',qty:2}]});assert.equal(r.status,200);const tid=r.data.id;assert.equal(stock('p2-L'),st-2);
+assert.equal((await post('orderTest',{id:tid,test:true})).status,403,'customers cannot flag test orders');
+as(owner);assert.equal((await post('orderDelete',{id:tid})).status,400,'real orders cannot be deleted');
+r=await post('orderTest',{id:tid,test:true});assert.equal(r.status,200);assert.equal(r.data.order.test,true);assert.ok(r.data.order.timeline.some(e=>/test order/i.test(e.message)));
+r=await post('orderTest',{id:tid,test:false});assert.equal(r.data.order.test,false);await post('orderTest',{id:tid,test:true});
+r=await post('orderDelete',{id:tid});assert.equal(r.status,200);assert.equal(r.data.restocked,2);assert.equal(stock('p2-L'),st,'stock returned');
+assert.equal(sql.prepare("SELECT COUNT(*) n FROM records WHERE id=?").get(tid).n,0);assert.equal(sql.prepare('SELECT COUNT(*) n FROM order_lines WHERE order_id=?').get(tid).n,0);
+assert.equal((await post('orderDelete',{id:tid})).status,404);
+
 // Without provider keys nothing is sent and checkout still works
 for(const k of Object.keys(globalThis.__testEnv))if(k!=='DB')delete globalThis.__testEnv[k];sent.length=0;as(alice);
 r=await post('checkout',{requestId:crypto.randomUUID(),name:'Alice',email:alice.email,phone:'55551234',address:'B1',items:[{variant:'p2-L',qty:1}]});assert.equal(r.status,200);assert.equal(sent.length,0);

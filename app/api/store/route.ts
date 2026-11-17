@@ -191,6 +191,19 @@ const text=String(body.note||'').trim().slice(0,1000);if(!text)return json({erro
 const u=await getCurrentUser()
 return json({ok:true,order:await commitOrder(o,addEvent(o,{type:'note',internal:true,by:u?.email||'Staff',message:text}))})
 }
+// Test orders: staff can flag an order as a test so it is kept out of sales figures, and delete it once flagged.
+if(action==='orderTest'){const o=await getOrder(body.id);if(!o)return json({error:'Order missing'},404)
+const test=body.test!==false;if(!!o.test===test)return json({ok:true,order:o})
+const u=await getCurrentUser()
+const saved=await commitOrder(o,addEvent({...o,test},{type:'note',internal:true,by:u?.email||'Staff',message:test?'Marked as a test order':'Test flag removed'}))
+await audit('Order '+o.id+(test?' marked as test':' unmarked as test'));return json({ok:true,order:saved})
+}
+if(action==='orderDelete'){const o=await getOrder(body.id);if(!o)return json({error:'Order missing'},404)
+if(!o.test)return json({error:'Only test orders can be deleted. Mark it as a test order first.'},400)
+const restock=o.status==='Cancelled'?[]:(o.items||[]).map((l:any)=>({variant:l.variant,qty:Math.max(0,l.qty-(l.cancelledQty||0))})).filter((x:any)=>x.qty>0)
+await db().batch([...restock.map((x:any)=>db().prepare('UPDATE variants SET stock=stock+? WHERE id=?').bind(x.qty,x.variant)),db().prepare('DELETE FROM order_lines WHERE order_id=?').bind(o.id),db().prepare("DELETE FROM records WHERE id=? AND kind='order'").bind(o.id)])
+await audit('Test order '+o.id+' deleted'+(restock.length?' · stock returned':''));return json({ok:true,restocked:restock.reduce((n:number,x:any)=>n+x.qty,0)})
+}
 if(action==='orderRefund'){const o=await getOrder(body.id);if(!o)return json({error:'Order missing'},404)
 if(!o.refundDue)return json({error:'No refund is due on this order'},400)
 const u=await getCurrentUser(),amt=o.refundDue
