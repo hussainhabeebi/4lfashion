@@ -1,5 +1,5 @@
 import {env} from 'cloudflare:workers';
-import {initialSettings, products as samples} from './catalog';
+import {initialSettings, products as samples, withCurrentPolicies} from './catalog';
 import {thumb} from './media';
 
 // The public catalog, read on the server so the first HTML already contains the
@@ -20,7 +20,7 @@ export async function publicCatalog(): Promise<PublicCatalog | null> {
       db.prepare("SELECT id FROM records WHERE id='store-initialized'").first(),
     ]);
     const products = rows(ps);
-    return {products, variants: vs.results, settings: rows(st)[0] || initialSettings, seeded: products.length > 0 || !!init};
+    return {products, variants: vs.results, settings: withCurrentPolicies(rows(st)[0] || initialSettings), seeded: products.length > 0 || !!init};
   } catch { return null; }
 }
 

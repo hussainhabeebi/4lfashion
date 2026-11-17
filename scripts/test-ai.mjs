@@ -80,7 +80,7 @@ globalThis.__testEnv={DB:db};globalThis.__testUser=null;globalThis.fetch=async()
 const catalogSrc=ts.transpileModule(fs.readFileSync('lib/catalog.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.ES2022}}).outputText;
 const ordersUrl=toUrl(fs.readFileSync('lib/orders.ts','utf8')),notifyUrl=toUrl(fs.readFileSync('lib/notify.ts','utf8').replace("from './orders'","from '"+ordersUrl+"'"));
 const source=fs.readFileSync('app/api/store/route.ts','utf8').replace("import { env } from 'cloudflare:workers';","const env=globalThis.__testEnv;").replace("import {getCurrentUser} from '../../auth';","const getCurrentUser=async()=>globalThis.__testUser;")
-  .replace("import {products,initialSettings,SIZES,RETIRED_SIZES} from '../../../lib/catalog';",catalogSrc.replaceAll('export ',''))
+  .replace("import {products,initialSettings,SIZES,RETIRED_SIZES,withCurrentPolicies} from '../../../lib/catalog';",catalogSrc.replaceAll('export ',''))
   .replace("'../../../lib/orders'","'"+ordersUrl+"'").replace("'../../../lib/notify'","'"+notifyUrl+"'").replace("'../../../lib/ai-features'","'"+aifUrl+"'").replace("'../../../lib/fit-ai'","'"+fitUrl+"'").replace("'../../../lib/qatar-ai'","'"+qaiUrl+"'").replace("'../../../lib/qatar'","'"+qUrl+"'");
 const mod=await import(toUrl(source));
 let ip=1;const post=async(action,data={},headers={})=>{const r=await mod.POST(new Request('https://test.local/api/store',{method:'POST',headers:{'Content-Type':'application/json','Origin':'https://test.local','cf-connecting-ip':'10.0.0.'+(ip++),...headers},body:JSON.stringify({action,...data})}));return {status:r.status,data:await r.json()}};

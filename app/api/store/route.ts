@@ -1,6 +1,6 @@
 import { env } from 'cloudflare:workers';
 import {getCurrentUser} from '../../auth';
-import {products,initialSettings,SIZES,RETIRED_SIZES} from '../../../lib/catalog';
+import {products,initialSettings,SIZES,RETIRED_SIZES,withCurrentPolicies} from '../../../lib/catalog';
 import {applyCancellation,addEvent,customerCanCancel,staffCanCancel,statusEvent,timelineOf,ORDER_STATUSES,NOTIFY_EVENTS} from '../../../lib/orders';
 import {notifyCustomer,notifyStore,notifyConfig,sendEmail,sendWhatsApp} from '../../../lib/notify';
 import {readFitIssues,measureGarmentPhoto,planOccasion} from '../../../lib/ai-features';
@@ -37,7 +37,7 @@ async function buyable(){const ps=await rows('product'),vs:any[]=(await db().pre
 async function rows(kind:string){let r=await db().prepare('SELECT * FROM records WHERE kind=? ORDER BY created DESC').bind(kind).all();return r.results.map((r:any)=>({...JSON.parse(r.data),id:r.id,owner:r.owner,created:r.created}));}
 async function write(kind:string,id:string,data:any,owner:string|null=null){await db().prepare('INSERT INTO records(id,kind,data,owner,created) VALUES(?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data').bind(id,kind,JSON.stringify(data),owner,new Date().toISOString()).run();}
 async function initialised(){return !!(await db().prepare("SELECT id FROM records WHERE id='store-initialized'").first());}
-async function settings(){return (await rows('settings'))[0]||initialSettings;}
+async function settings(){return withCurrentPolicies((await rows('settings'))[0]||initialSettings);}
 async function admin(){let u=await getCurrentUser();if(!u)return false; const roles=await rows('staff');return roles.some((r:any)=>r.email.toLowerCase()===u.email.toLowerCase()&&['owner','admin','manager'].includes(r.role));}
 // Save an order change only if nobody changed it meanwhile (version guard); restock in the same transaction.
 async function commitOrder(prev:any,next:any,restock:{variant:string,qty:number}[]=[]){const v=Number(prev.version||0),guard="COALESCE(json_extract(data,'$.version'),0)=?";const {id:_i,owner:_o,created:_c,...data}={...next,version:v+1};const stmts=restock.map(x=>db().prepare(`UPDATE variants SET stock=stock+? WHERE id=? AND EXISTS(SELECT 1 FROM records WHERE id=? AND ${guard})`).bind(x.qty,x.variant,prev.id,v));stmts.push(db().prepare(`UPDATE records SET data=? WHERE id=? AND kind='order' AND ${guard}`).bind(JSON.stringify(data),prev.id,v));await db().batch(stmts);const saved=await getOrder(prev.id);if(Number(saved?.version||0)!==v+1)throw Error('This order was just changed by someone else. Refresh and try again.');return saved}
