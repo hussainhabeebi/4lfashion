@@ -99,6 +99,18 @@ r=await post('orderDelete',{id:tid});assert.equal(r.status,200);assert.equal(r.d
 assert.equal(sql.prepare("SELECT COUNT(*) n FROM records WHERE id=?").get(tid).n,0);assert.equal(sql.prepare('SELECT COUNT(*) n FROM order_lines WHERE order_id=?').get(tid).n,0);
 assert.equal((await post('orderDelete',{id:tid})).status,404);
 
+// Permanently deleting a customer erases personal data, keeps anonymised orders, and is staff-only
+sql.prepare('INSERT INTO auth_users(id,email,name,created) VALUES(?,?,?,?)').run('alice',alice.email,'Alice',Date.now());sql.prepare('INSERT INTO auth_sessions(id,user_id,expires) VALUES(?,?,?)').run('sess-a','alice',Date.now()+1e6);
+as(alice);await post('profile',{data:{name:'Alice',address:'Home'}});
+const cid='customer-'+alice.email,aliceOrders=sql.prepare("SELECT COUNT(*) n FROM records WHERE kind='order' AND json_extract(data,'$.email')=?").get(alice.email).n;assert.ok(aliceOrders>0);
+assert.equal((await post('deleteCustomer',{id:cid})).status,403,'customers cannot delete customers');
+as(owner);assert.equal((await post('deleteCustomer',{id:'customer-owner@example.test'})).status,404);
+r=await post('deleteCustomer',{id:cid});assert.equal(r.status,200,JSON.stringify(r.data));assert.equal(r.data.orders,aliceOrders);
+const left=sql.prepare("SELECT data,owner FROM records WHERE kind<>'activity'").all().filter(x=>x.data.includes(alice.email)||x.data.includes('55551234')||x.owner==='alice');assert.deepEqual(left,[],'no personal data left');
+assert.equal(sql.prepare("SELECT COUNT(*) n FROM records WHERE kind='order' AND json_extract(data,'$.name')='Deleted customer'").get().n,aliceOrders,'orders kept, anonymised');
+assert.equal(sql.prepare('SELECT COUNT(*) n FROM auth_users WHERE id=?').get('alice').n,0);assert.equal(sql.prepare('SELECT COUNT(*) n FROM auth_sessions WHERE user_id=?').get('alice').n,0);
+assert.equal((await post('deleteCustomer',{id:cid})).status,404);
+
 // Without provider keys nothing is sent and checkout still works
 for(const k of Object.keys(globalThis.__testEnv))if(k!=='DB')delete globalThis.__testEnv[k];sent.length=0;as(alice);
 r=await post('checkout',{requestId:crypto.randomUUID(),name:'Alice',email:alice.email,phone:'55551234',address:'B1',items:[{variant:'p2-L',qty:1}]});assert.equal(r.status,200);assert.equal(sent.length,0);
