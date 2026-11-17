@@ -78,7 +78,7 @@ You can ask us for a copy of the personal data we hold about you, ask us to corr
 
 Your data is processed by the services listed above, which may store it on servers outside Qatar. We only share what each service needs to do its job.`;
 // Terms & conditions shown at /terms, as supplied by the store (typos fixed, lists formatted).
-export const TERMS_POLICY_VERSION=1;
+export const TERMS_POLICY_VERSION=2;
 export const TERMS_POLICY=`The products and services that feature on 4L Fashions are offered to you by https://4lfashion.com.qa/. 4L Fashions is a registered company in Qatar Ministry of Commerce and Industry 251805, and is governed according to Qatar law.
 
 ## General
@@ -95,11 +95,12 @@ export const TERMS_POLICY=`The products and services that feature on 4L Fashions
 4. 4lfashion.com.qa has the right to suspend or cancel your registration.
 5. 4lfashion.com.qa may suspend or cancel your registration immediately at our reasonable discretion or if you breach any of your obligations under these Terms and Conditions.
 
-## Password and Security
+## Account and Security
 
-1. You must keep your password confidential and must not share it with anyone.
-2. You are responsible for all activities and orders that are made with your user name and password.
-3. If you suspect anybody is using your user name and password, you should inform us immediately at info@4LFashion.com.qa
+1. You sign in to 4lfashion.com.qa with your Google account. We do not create or store a password for you.
+2. You must keep your Google account secure and must not share access to it with anyone.
+3. You are responsible for all activities and orders made while signed in with your account.
+4. If you suspect anybody is using your account, inform us immediately at info@4LFashion.com.qa
 
 ## Intellectual Property
 
