@@ -770,3 +770,26 @@ main>section.h-visit{display:grid;grid-template-columns:1fr 1.2fr;gap:0;max-widt
 .badge.test{background:#ece8f6;color:#5d4d8c;margin-left:6px}
 .test-orders-note{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}.test-orders-note p{margin:0;flex:1;min-width:200px}
 .test-orders-hint{margin:0 0 12px}
+/* Admin → Integrations: platform connections (Leadvyne etc.) */
+.platform-connections .panel>.between{gap:16px;align-items:flex-start;flex-wrap:wrap}
+.platform-connections .panel>.between>div:first-child{flex:1 1 320px;min-width:0}
+.pc-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.pc-actions .outline,.pc-actions .primary{min-height:34px;padding:7px 12px;font-size:11px;gap:6px}
+.pc-secondary{margin-top:12px;gap:16px}.pc-secondary .text-link{display:inline-flex;gap:5px;align-items:center;font-size:11px}
+.pc-secret{border:1px solid #c9dcc8;background:#f3f8f1;border-radius:6px;padding:16px;margin:0 0 18px}
+.pc-secret b{display:inline-flex;gap:6px;align-items:center}
+.pc-field{display:block;margin:10px 0;font-size:11px}.pc-field>span{display:flex;gap:8px;margin-top:4px}
+.pc-field input{flex:1;min-width:0;font-size:12px}.pc-field input.mono,.pc-code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.pc-code{background:#fff;border:1px solid var(--line);padding:10px;font-size:11px;white-space:pre-wrap;overflow-wrap:anywhere;margin:6px 0 0;border-radius:4px}
+.pc-form{border:1px solid var(--line);border-radius:6px;padding:18px;margin:0 0 18px;background:#fff}
+.pc-form h4{margin:0 0 10px}.pc-form fieldset{border:1px solid var(--line);border-radius:5px;padding:12px 14px;margin:14px 0}
+.pc-form legend{font-size:11px;font-weight:600;padding:0 6px}.pc-form .small,.pc-reference .small{font-size:11px}
+.pc-events{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 16px;margin-top:10px}
+.pc-events .check{align-items:flex-start;font-size:11px}
+.pc-card{border:1px solid var(--line);border-radius:6px;padding:16px;margin-top:14px;background:#fff}
+.pc-card h4{margin:0 0 4px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pc-meta{display:flex;flex-direction:column;gap:5px;margin-top:12px;font-size:11px;overflow-wrap:anywhere}
+.pc-meta b{display:inline-block;min-width:70px;font-weight:600}.pc-meta .ok{color:#3f7a4b;vertical-align:-2px}.pc-meta .bad{color:#a3261f;vertical-align:-2px}
+.pc-card details{margin-top:10px;font-size:11px}.pc-card summary{cursor:pointer;color:var(--muted)}
+.pc-reference td{vertical-align:top}.pc-reference td:first-child{white-space:nowrap}
+@media(max-width:760px){.pc-events{grid-template-columns:1fr}.pc-reference td:first-child{white-space:normal}.pc-field>span{flex-wrap:wrap}}

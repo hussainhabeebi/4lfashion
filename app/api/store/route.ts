@@ -1,4 +1,5 @@
 import { env } from 'cloudflare:workers';
+import { waitUntil } from 'cloudflare:workers';
 import {getCurrentUser} from '../../auth';
 import {products,initialSettings,SIZES,RETIRED_SIZES,withCurrentPolicies} from '../../../lib/catalog';
 import {applyCancellation,addEvent,customerCanCancel,staffCanCancel,statusEvent,timelineOf,ORDER_STATUSES,NOTIFY_EVENTS} from '../../../lib/orders';
@@ -6,6 +7,7 @@ import {notifyCustomer,notifyStore,notifyConfig,sendEmail,sendWhatsApp} from '..
 import {readFitIssues,measureGarmentPhoto,planOccasion} from '../../../lib/ai-features';
 import {addSignals,type FitProfile} from '../../../lib/fit-ai';
 import {qatarMonth,festivalsAround,FESTIVALS,sanitizeMembers,sanitizeTiers,groupTotals,groupCode,mergePicks,topPicks,festivalWant,monthWardrobe} from '../../../lib/qatar';
+import {listIntegrations,recentDeliveries,publicIntegration,cleanIntegrationInput,newApiKey,newSigningSecret,keyPrefix,sha256Hex,dispatchEvent,emitForAction} from '../../../lib/integrations';
 import {dressGuide,monthGuide,festivalKit,welcomeKit,themeMatch,styleSearch} from '../../../lib/qatar-ai';
 export const dynamic='force-dynamic';
 const db=()=>{if(!env.DB)throw Error('Database unavailable');return env.DB};
@@ -38,6 +40,8 @@ async function rows(kind:string){let r=await db().prepare('SELECT * FROM records
 async function write(kind:string,id:string,data:any,owner:string|null=null){await db().prepare('INSERT INTO records(id,kind,data,owner,created) VALUES(?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data').bind(id,kind,JSON.stringify(data),owner,new Date().toISOString()).run();}
 async function initialised(){return !!(await db().prepare("SELECT id FROM records WHERE id='store-initialized'").first());}
 async function settings(){return withCurrentPolicies((await rows('settings'))[0]||initialSettings);}
+// Owner/administrator only (not store managers): team access and platform API keys.
+async function teamAdmin(){const u=await getCurrentUser();if(!u)return false;return (await rows('staff')).some((r:any)=>r.email.toLowerCase()===u.email.toLowerCase()&&['owner','admin'].includes(r.role));}
 async function admin(){let u=await getCurrentUser();if(!u)return false; const roles=await rows('staff');return roles.some((r:any)=>r.email.toLowerCase()===u.email.toLowerCase()&&['owner','admin','manager'].includes(r.role));}
 // Save an order change only if nobody changed it meanwhile (version guard); restock in the same transaction.
 async function commitOrder(prev:any,next:any,restock:{variant:string,qty:number}[]=[]){const v=Number(prev.version||0),guard="COALESCE(json_extract(data,'$.version'),0)=?";const {id:_i,owner:_o,created:_c,...data}={...next,version:v+1};const stmts=restock.map(x=>db().prepare(`UPDATE variants SET stock=stock+? WHERE id=? AND EXISTS(SELECT 1 FROM records WHERE id=? AND ${guard})`).bind(x.qty,x.variant,prev.id,v));stmts.push(db().prepare(`UPDATE records SET data=? WHERE id=? AND kind='order' AND ${guard}`).bind(JSON.stringify(data),prev.id,v));await db().batch(stmts);const saved=await getOrder(prev.id);if(Number(saved?.version||0)!==v+1)throw Error('This order was just changed by someone else. Refresh and try again.');return saved}
@@ -60,10 +64,16 @@ if(action==='myGroups'){const u=await getCurrentUser();if(!u)return json({groups
 if(action==='fitProfile'){const u=await getCurrentUser();if(!u)return json({signals:[]});return json(await fitProfileOf(u.userId));}
 if(action==='track'){const id=url.searchParams.get('id'),email=url.searchParams.get('email');let o=(await rows('order')).find((x:any)=>x.id===id&&x.email.toLowerCase()===email?.toLowerCase());return o?json({id:o.id,status:o.status,created:o.created,tracking:o.tracking||'',carrier:o.carrier||''}):json({error:'Order not found. Check your reference and email.'},404);}
 if(action==='admin'){if(!await admin())return json({error:'Administrator access required'},403);const kinds=['product','order','return','customer','expense','staff','activity','coupon','review','subscriber','stockMovement','journal','group','communityEvent'];const all=await Promise.all(kinds.map(rows));const gi=kinds.indexOf('group');all[gi]=await Promise.all(all[gi].map(async(g:any)=>({...g,members:await groupMembers(g.id)})));
-return json({...Object.fromEntries(kinds.map((k,i)=>[k,all[i]])),settings:await settings(),notifyConfig:notifyConfig(env as any),googleUsers:(await db().prepare('SELECT id,email,name FROM auth_users ORDER BY name').all()).results,variants:(await db().prepare('SELECT * FROM variants').all()).results});}
+return json({...Object.fromEntries(kinds.map((k,i)=>[k,all[i]])),settings:await settings(),notifyConfig:notifyConfig(env as any),integration:await Promise.all((await listIntegrations(db())).map(async(x:any)=>publicIntegration(x,await recentDeliveries(db(),x.id)))),googleUsers:(await db().prepare('SELECT id,email,name FROM auth_users ORDER BY name').all()).results,variants:(await db().prepare('SELECT * FROM variants').all()).results});}
 return json({error:'Unknown action'},400);
 }catch(e:any){return json({error:e.message},500)}}
-export async function POST(req:Request){try{if(req.headers.get('origin')&&req.headers.get('origin')!==new URL(req.url).origin)return json({error:'Invalid origin'},403);const body:any=await req.json();const {action}=body;
+// Platform webhooks (Leadvyne etc.): after a successful change, push the matching events in the background.
+const EMITTING=['checkout','pos','orderCancel','orderStatus','orderRefund','orderTest','orderDelete','save','deleteProduct','stock'];
+const later=(p:Promise<unknown>)=>{try{waitUntil(p)}catch{p.catch(()=>{})}};
+export async function POST(req:Request){const copy=req.clone();const res=await handlePost(req);
+if(res.ok){try{const body:any=await copy.json();if(EMITTING.includes(body?.action)){const result=await res.clone().json();later(emitForAction(env.DB as any,body.action,body,result,{appUrl:(env as any).APP_URL}))}}catch{}}
+return res;}
+async function handlePost(req:Request){try{if(req.headers.get('origin')&&req.headers.get('origin')!==new URL(req.url).origin)return json({error:'Invalid origin'},403);const body:any=await req.json();const {action}=body;
 if(action==='bootstrap'){const u=await getCurrentUser();if(!u)return json({error:'Sign in with Google to initialise the store'},401);if(!await admin())return json({error:'Owner or administrator access required. Configure OWNER_EMAIL and sign in with that Google account.'},403);if((await rows('product')).length||await initialised())return json({error:'Already initialised'},409);const now=new Date().toISOString(),stmts:any[]=[db().prepare('INSERT INTO records(id,kind,data,owner,created) VALUES(?,?,?,?,?)').bind('store-initialized','setup','{}',u.userId,now)];for(const p of products){stmts.push(db().prepare('INSERT INTO records(id,kind,data,owner,created) VALUES(?,?,?,?,?)').bind(p.id,'product',JSON.stringify({...p,published:true,brand:'4L Fashion',care:'Gentle hand wash separately. Dry in shade.',description:'A considered addition to your wardrobe, selected for effortless elegance and everyday comfort.'}),null,now));for(const [i,size] of SIZES.entries())stmts.push(db().prepare('INSERT INTO variants(id,product,size,colour,stock,price,barcode) VALUES(?,?,?,?,?,?,?)').bind(p.id+'-'+size,p.id,size,p.colour,10+i,Math.round(p.price*100),'4L'+p.id.toUpperCase()+size));}stmts.push(db().prepare('INSERT INTO records(id,kind,data,owner,created) VALUES(?,?,?,?,?) ON CONFLICT(id) DO NOTHING').bind('store-settings','settings',JSON.stringify(initialSettings),null,now));await db().batch(stmts);return json({ok:true});}
 if(action==='checkout'||action==='pos'){if(!/^[a-f0-9-]{36}$/i.test(body.requestId||''))return json({error:'A valid checkout request ID is required'},400);const orderId='4L-'+body.requestId.replaceAll('-','').toUpperCase();const existing=(await rows('order')).find((o:any)=>o.id===orderId);if(existing)return existing.email===String(body.email).toLowerCase()?json(existing):json({error:'Request already used'},409);const pos=action==='pos';if(pos&&!await admin())return json({error:'Access denied'},403);const u=await getCurrentUser();if(!body.email||!body.name||(!pos&&(!body.phone||!body.address)))return json({error:'Complete your contact and delivery details'},400);if(!Array.isArray(body.items)||!body.items.length||body.items.length>50)return json({error:'Invalid cart'},400);
 const unique=new Map<string,number>();for(const x of body.items){if(!Number.isInteger(x.qty)||x.qty<1||x.qty>50)return json({error:'Invalid quantity'},400);unique.set(x.variant,(unique.get(x.variant)||0)+x.qty)}
@@ -157,6 +167,26 @@ if(!staff){try{const cfg:any=await settings();const n:any={storeAlerts:true,...(
 return json({ok:true,order:staff?saved:{...saved,timeline:timelineOf(saved,false)},notifications:staff?sent:[]})
 }
 if(!await admin())return json({error:'Administrator access required'},403);
+// ---------- Platform integrations (API keys + webhooks) ----------
+if(typeof action==='string'&&action.startsWith('integration')){if(!await teamAdmin())return json({error:'Only the owner or an administrator can manage platform connections.'},403)
+const getInt=async()=>{const r:any=await db().prepare("SELECT * FROM records WHERE id=? AND kind='integration'").bind(String(body.id||'')).first();return r?{...JSON.parse(r.data),id:r.id,created:r.created}:null}
+const save=async(x:any)=>{const {id,created:_c,owner:_o,deliveries:_d,...data}=x;await write('integration',id,data)}
+const view=async(x:any)=>publicIntegration(x,await recentDeliveries(db(),x.id))
+if(action==='integrationCreate'){const c=cleanIntegrationInput(body.data);if(c.error)return json({error:c.error},400)
+if((await listIntegrations(db())).length>=20)return json({error:'You can have up to 20 connections. Disconnect one you no longer use.'},400)
+const apiKey=newApiKey(),signingSecret=newSigningSecret(),id='integration-'+crypto.randomUUID()
+const x={...c.value,keyHash:await sha256Hex(apiKey),keyPrefix:keyPrefix(apiKey),secret:signingSecret,id,created:new Date().toISOString()}
+await save(x);await audit('Platform connection '+x.name+' created');return json({ok:true,integration:await view(x),apiKey,signingSecret})}
+const x=await getInt();if(!x)return json({error:'Connection not found'},404)
+if(action==='integrationUpdate'){const c=cleanIntegrationInput(body.data||{},x);if(c.error)return json({error:c.error},400);const next={...x,...c.value};await save(next);await audit('Platform connection '+next.name+' updated');return json({ok:true,integration:await view(next)})}
+if(action==='integrationRotate'){if(body.what==='secret'){const signingSecret=newSigningSecret();const next={...x,secret:signingSecret,rotated:new Date().toISOString()};await save(next);await audit('Platform connection '+x.name+' signing secret replaced');return json({ok:true,integration:await view(next),signingSecret})}
+const apiKey=newApiKey(),next={...x,keyHash:await sha256Hex(apiKey),keyPrefix:keyPrefix(apiKey),rotated:new Date().toISOString(),lastUsed:''};await save(next);await audit('Platform connection '+x.name+' API key replaced');return json({ok:true,integration:await view(next),apiKey})}
+if(action==='integrationReveal'){await audit('Platform connection '+x.name+' signing secret viewed');return json({ok:true,signingSecret:x.secret})}
+if(action==='integrationTest'){if(!x.webhookUrl)return json({error:'Add a webhook URL first. The API key works without one.'},400)
+const [r]=await dispatchEvent(db() as any,'ping',{message:'Test event from '+((await settings() as any).name||'4L Fashion')+'. Your webhook is connected.'},{only:x.id})
+return json({ok:!!r?.ok,result:r,integration:await view(x),error:r?.ok?undefined:'The platform did not accept the test: '+(r?.error||'no response')},r?.ok?200:400)}
+if(action==='integrationDelete'){await db().batch([db().prepare("DELETE FROM records WHERE id=? AND kind='integration'").bind(x.id),db().prepare("DELETE FROM records WHERE kind='webhookDelivery' AND owner=?").bind(x.id)]);await audit('Platform connection '+x.name+' disconnected');return json({ok:true})}
+return json({error:'Unknown action'},400)}
 if(action==='deleteProduct'){const id=String(body.id||'');const p=await db().prepare("SELECT id,data FROM records WHERE id=? AND kind='product'").bind(id).first<{id:string;data:string}>();if(!p)return json({error:'Product not found'},404);await db().batch([db().prepare('DELETE FROM variants WHERE product=?').bind(id),db().prepare("DELETE FROM records WHERE id=? AND kind='product'").bind(id)]);await audit('Deleted product '+(JSON.parse(p.data).name||id));return json({ok:true,id});}
 // Permanently erase a customer's personal data. Orders are kept for sales/accounting but anonymised.
 if(action==='deleteCustomer'){const c:any=await db().prepare("SELECT id,data FROM records WHERE id=? AND kind='customer'").bind(String(body.id||'')).first();if(!c)return json({error:'Customer not found'},404)
